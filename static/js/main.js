@@ -1,31 +1,33 @@
 $(document).ready(function() {
+    // initializing constants and removing attributes from html elements
+    var PLOT_SERIES = $('#cell_line_chart').attr('data-plot-series').replace(/'/g, '"'); //");
+    PLOT_SERIES = JSON.parse(PLOT_SERIES);
+    var GENES = $('#cell_line_chart').attr('data-genes').replace(/'/g, '"'); //");
+    GENES = JSON.parse(GENES);
+
+    // removing attributes
+    $('#cell_line_chart').removeAttr('data-genes');
+    $('#cell_line_chart').removeAttr('data-plot-series');
+
+    // initializing plot
     $('#plot_button').on('click', function() {
         var cell_line = $('#cell_line_select').val();
-        console.log(cell_line);
-
-        var cell_lines = $('#cell_line_chart').attr('data-cell-lines').replace(/'/g, '"'); //");
-        console.log(cell_lines);
-        cell_lines = JSON.parse(cell_lines);
-        var plot_data = cell_lines[cell_line];
-        console.log(plot_data);
-        var genes = $('#cell_line_chart').attr('data-genes').replace(/'/g, '"'); //");
-        console.log(genes);
-        genes = JSON.parse(genes);
-        console.log(genes);
+        // setting up the max number of points
+        var turbo_threshold = GENES.length;
         Highcharts.chart('cell_line_chart', {
             chart: {
                 type: 'scatter',
                 zoomType: 'xy'
             },
             title: {
-                text: 'Fold change values'
+                text: 'Fold change values for cell line <b>' + cell_line + '</b>'
             },
             xAxis: {
                 title: {
                     enabled: true,
                     text: 'Genes'
                 },
-                categories: genes,
+                categories: GENES,
                 startOnTick: true,
                 endOnTick: true,
                 showLastLabel: true
@@ -54,14 +56,18 @@ $(document).ready(function() {
                         }
                     },
                     tooltip: {
-                        headerFormat: '<b>{series.name}</b><br>',
-                        pointFormat: '{point.y}'
+                        headerFormat: '<b>gene: {point.x}</b><br>',
+                        pointFormat: '<b>fc value:</b> {point.y:.3f}<br><b>p value:</b> {point.value:.3f}',
+                        formatter: function() {
+                          return 'pvalue: <b>' + this.point.value + '</b>';
+                        },
                     }
                 }
             },
             series: [{
                 name: cell_line,
-                data: plot_data,
+                data: PLOT_SERIES[cell_line],
+                turboThreshold: turbo_threshold,
             }]
         });
     });
