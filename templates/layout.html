@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CRISPR analysis</title>
+</head>
+<body>
+    {# custom style #}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"
+                crossorigin="anonymous">
+        </script>
+    {# requirements for bootstrap #}
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"
+                integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+                crossorigin="anonymous">
+        </script>
+    {# end of requirements for bootstrap #}
+
+    <div id="page" class="mx-4">
+      <nav class="navbar navbar-light bg-light justify-content-center">
+        <ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Main Page</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/analysis">Analysis</a>
+          </li>
+          </ul>
+        </nav>
+        {% block body %}{% endblock %}
+    </div>
+</body>
+</html>
