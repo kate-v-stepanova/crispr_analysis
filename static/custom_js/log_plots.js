@@ -1,40 +1,40 @@
 $(document).ready(function() {
     // initializing constants and removing attributes from html elements
     var PLOT_SERIES = $('#cell_line_chart').attr('data-plot-series').replace(/'/g, '"'); //");
-    PLOT_SERIES = JSON.parse(PLOT_SERIES);
+    if (PLOT_SERIES.length != 0) {
+        PLOT_SERIES = JSON.parse(PLOT_SERIES);
+    }
     var GENES = $('#cell_line_chart').attr('data-genes').replace(/'/g, '"'); //");
-    GENES = JSON.parse(GENES);
+    if (GENES.length != 0) {
+        GENES = JSON.parse(GENES);
+    }
 
     // removing attributes
     $('#cell_line_chart').removeAttr('data-genes');
     $('#cell_line_chart').removeAttr('data-plot-series');
 
-    // initializing plot
-    $('#plot_button').on('click', function() {
+    if (GENES.length != 0) {
+        // initializing plot
         var cell_line = $('#cell_line_select').val();
         // setting up the max number of points
         var turbo_threshold = GENES.length;
+
         Highcharts.chart('cell_line_chart', {
             chart: {
                 type: 'scatter',
                 zoomType: 'xy'
             },
             title: {
-                text: 'Fold change values for cell line <b>' + cell_line + '</b>'
+                text: 'Fold change against p value for selected cell line:<b>' + cell_line + '</b>'
             },
             xAxis: {
                 title: {
-                    enabled: true,
-                    text: 'Genes'
+                    text: 'log2(fc)'
                 },
-                categories: GENES,
-                startOnTick: true,
-                endOnTick: true,
-                showLastLabel: true
             },
             yAxis: {
                 title: {
-                    text: 'Fold change'
+                    text: '-log10(pval)'
                 }
             },
             plotOptions: {
@@ -56,19 +56,20 @@ $(document).ready(function() {
                         }
                     },
                     tooltip: {
-                        headerFormat: '<b>gene: {point.x}</b><br>',
-                        pointFormat: '<b>fc value:</b> {point.y:.3f}<br><b>p value:</b> {point.value:.3f}',
+                        headerFormat: '<b>gene: {point.name}</b><br>',
+                        pointFormat: '<b>log2(pval):</b> {point.y}<br><b>-log10(fc):</b> {point.x}<br>' +
+                                    '<b>p value:</b> {point.pval}<br><b>fc:</b> {point.fc}',
                         formatter: function() {
-                          return 'pvalue: <b>' + this.point.value + '</b>';
+                          return 'p value: <b>' + this.point.pval + '</b><br>fc value: <b>' + this.point.fc +'</b>';
                         },
                     }
                 }
             },
             series: [{
                 name: cell_line,
-                data: PLOT_SERIES[cell_line],
+                data: PLOT_SERIES,
                 turboThreshold: turbo_threshold,
             }]
         });
-    });
+    }
 });

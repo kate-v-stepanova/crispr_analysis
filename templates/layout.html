@@ -22,14 +22,17 @@
       <nav class="navbar navbar-light bg-light justify-content-center">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="/">Main Page</a>
+            <a class="nav-link" href="/">Single Cell Line</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/analysis">Analysis</a>
+            <a class="nav-link" href="/log_plots">Log Plots</a>
           </li>
-          </ul>
-        </nav>
-        {% block body %}{% endblock %}
+          <li class="nav-item">
+            <a class="nav-link" href="/compare">Compare Cell Lines</a>
+          </li>
+        </ul>
+      </nav>
+      {% block body %}{% endblock %}
     </div>
 </body>
 </html>
