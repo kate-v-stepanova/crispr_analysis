@@ -39,7 +39,7 @@
   <div id="cell_line_chart" data-plot-series="{{ plot_series.values() | list() }}"></div>
 {% elif how_to_plot=='multiple_plots' %}
   {% for cell_line in y_axis_multiple %}
-    <div id="{{ cell_line }}_chart" data-plot-series="{{ plot_series[cell_line] }}"></div>
+    <div id="{{ cell_line }}_chart" data-plot-series="{{ [plot_series[cell_line]] }}"></div>
   {% endfor %}
 {% endif %}
 {% endblock %}

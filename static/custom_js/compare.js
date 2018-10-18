@@ -23,14 +23,12 @@ $(document).ready(function() {
             var x_axis = $('#first_cell_line').val();
             var y_axis = $('#multiple_cell_lines').val();
 
-            chart_containers.push('#cell_line_chart');
+            chart_containers.push('cell_line_chart');
             titles.push('Fold change values selected cell lines:<b>' + x_axis + '</b> and <b>' + y_axis + '</b>');
             y_axis_text.push('Fold Change for ' + y_axis);
             plot_series.push(PLOT_SERIES);
-            // from here
         }
-
-    } else {
+    } else { // for multiple plots
         var how_to_plot = $('input:radio:checked').val();
         if (how_to_plot == 'multiple_plots') {
             var x_axis = $('#first_cell_line').val();
@@ -52,11 +50,12 @@ $(document).ready(function() {
     }
 
     for(i=0; i<chart_containers.length; i++) {
-        // initializing plot
+        // initializing plot(s)
         Highcharts.chart(chart_containers[i], {
             chart: {
                 type: 'scatter',
-                zoomType: 'xy'
+                zoomType: 'xy',
+                height: 30 + '%'
             },
             title: {
                 text: titles[i]
@@ -68,7 +67,7 @@ $(document).ready(function() {
             },
             yAxis: {
                 title: {
-                    text: y_axis_text[i];
+                    text: y_axis_text[i],
                 }
             },
             plotOptions: {
@@ -90,10 +89,10 @@ $(document).ready(function() {
                         }
                     },
                     tooltip: {
-                        pointFormat: '<b>gene:</b> {point.gene_id}<br><b>' + x_axis + ' fc:</b> {point.x:.3f}<br><b>' + y_axis + ' fc:</b> {point.y:.3f}',
-                        formatter: function() {
-                          return 'gene_id: <b>' + this.point.gene_id + '</b>';
-                        },
+                        pointFormat: '<b>gene:</b> {point.gene_id}<br><b>' + x_axis + ' fc:</b> {point.x:.3f}<br><b>' +
+                                    '<br><b>' + x_axis + ' p value: </b> {point.x_pval:.3f}' +
+                                    '<br><b>' + y_axis[i] + ' fc:</b> {point.y:.3f}' +
+                                    '<br><b>' + y_axis[i] + ' p value: </b> {point.y_pval:.3f}',
                     }
                 }
             },
