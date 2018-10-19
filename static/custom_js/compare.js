@@ -55,7 +55,7 @@ $(document).ready(function() {
             chart: {
                 type: 'scatter',
                 zoomType: 'xy',
-                height: 30 + '%'
+                height: 600,
             },
             title: {
                 text: titles[i]
@@ -97,6 +97,9 @@ $(document).ready(function() {
                 }
             },
             series: plot_series[i],
+            exporting: {
+                fallbackToExportServer: false,
+            }
         });
     }
 });
