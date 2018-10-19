@@ -41,8 +41,100 @@
       <label class="custom-control-label" for="multiple_plots">Multiple plots</label>
   </div>
 
+  {# filter data #}
+  <div class="form-check mt-4">
+    <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters">
+    <label class="form-check-label" for="apply_filters">Apply filters</label>
+  </div>
+
+  <div class="row d-none ml-2" id="data_filters">
+  {# X AXIS #}
+    {# FC #}
+    <div class="list-group col-sm-6">
+    <h2>X axis Filter</h2>
+      <div class="list-group-item">
+      <h4 class="list-item-heading">FC value</h4>
+        <div class="list-group-item-text row">
+          <div class="col-sm-4">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="x_fc_less" name="x_fc_less_or_greater" value="less">
+              <label class="custom-control-label" for="x_fc_less">Less than</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" class="custom-control-input" id="x_fc_greater" name="x_fc_less_or_greater" value="greater" checked>
+                <label class="custom-control-label" for="x_fc_greater">Greater than</label>
+            </div>
+          </div>
+          <div class="col-sm-8 mt-2">
+            <input class="form-control" type="number" name="x_fc_max" min="0.0" step="0.01" value="0.67" id="x_fc_max">
+          </div>
+        </div>
+      </div>
+      {# P VALUE #}
+      <div class="list-group-item">
+      <h4 class="list-item-heading">P value</h4>
+        <div class="list-group-item-text row">
+          <div class="col-sm-4">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="x_pval_less" name="x_pval_less_or_greater" value="less" checked>
+              <label class="custom-control-label" for="x_pval_less">Less than</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" class="custom-control-input" id="x_pval_greater" name="x_pval_less_or_greater" value="greater">
+                <label class="custom-control-label" for="x_pval_greater">Greater than</label>
+            </div>
+          </div>
+          <div class="col-sm-8 mt-2">
+            <input class="form-control" type="number" name="x_pval_max" min="0.0" step="0.01" value="0.15" id="x_pval_max">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Y AXIS #}
+    <div class="list-group col-sm-6">
+      <h2>Y axis Filter</h2>
+      <div class="list-group-item">
+      <h4 class="list-item-heading">FC value</h4>
+        <div class="list-group-item-text row">
+          <div class="col-sm-4">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="y_fc_less" name="y_fc_less_or_greater" value="less">
+              <label class="custom-control-label" for="y_fc_less">Less than</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" class="custom-control-input" id="y_fc_greater" name="y_fc_less_or_greater" value="greater" checked>
+                <label class="custom-control-label" for="y_fc_greater">Greater than</label>
+            </div>
+          </div>
+          <div class="col-sm-8 mt-2">
+            <input class="form-control" type="number" name="y_fc_max" min="0.0" step="0.01" value="0.67" id="y_fc_max">
+          </div>
+        </div>
+      </div>
+      <div class="list-group-item">
+      <h4 class="list-item-heading">P value</h4>
+        <div class="list-group-item-text row">
+          <div class="col-sm-4">
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="y_pval_less" name="y_pval_less_or_greater" value="less" checked>
+              <label class="custom-control-label" for="y_pval_less">Less than</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" class="custom-control-input" id="y_pval_greater" name="y_pval_less_or_greater" value="greater">
+                <label class="custom-control-label" for="y_pval_greater">Greater than</label>
+            </div>
+          </div>
+          <div class="col-sm-8 mt-2">
+            <input class="form-control" type="number" name="y_pval_max" min="0.0" step="0.01" value="0.15" id="y_pval_max">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <button class="btn btn-outline-info mt-4" type="submit" id="plot_button">Plot data</button>
 </form>
+
 {% if how_to_plot=='single_plot' %}
   <div id="cell_line_chart" data-plot-series="{{ plot_series.values() | list() }}"></div>
 {% elif how_to_plot=='multiple_plots' %}
