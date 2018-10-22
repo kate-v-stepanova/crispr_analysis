@@ -23,6 +23,23 @@ def compare_cell_lines():
             df = ORIGINAL_DF[columns]
             df.columns = ['gene_id', 'x', 'y', 'x_pval', 'y_pval']
             df = df.round(decimals=3)
+
+            # apply filters
+            apply_filters = request.form.get('apply_filters') is not None
+            if apply_filters:
+                x_fc = float(request.form.get('x_fc_max'))
+                x_fc_less_or_greater = request.form.get('x_fc_less_or_greater')
+                x_pval = float(request.form.get('x_pval_max'))
+                x_pval_less_or_greater = request.form.get('x_pval_less_or_greater')
+                y_fc = float(request.form.get('y_fc_max'))
+                y_fc_less_or_greater = request.form.get('y_fc_less_or_greater')
+                y_pval = float(request.form.get('y_pval_max'))
+                y_pval_less_or_greater = request.form.get('y_pval_less_or_greater')
+                df = df.loc[df['x'] >= x_fc] if x_fc_less_or_greater == 'greater' else df.loc[df['x'] <= x_fc]
+                df = df.loc[df['y'] >= y_fc] if y_fc_less_or_greater == 'greater' else df.loc[df['y'] <= y_fc]
+                df = df.loc[df['x_pval'] >= x_pval] if x_pval_less_or_greater == 'greater' else df.loc[df['x_pval'] <= x_pval]
+                df = df.loc[df['y_pval'] >= y_pval] if y_pval_less_or_greater == 'greater' else df.loc[df['y_pval'] <= y_pval]
+
             plot_series[cell_line] = {
                 'name': '{}'.format(cell_line),
                 'data': list(df.T.to_dict().values()),
@@ -39,5 +56,6 @@ def compare_cell_lines():
             df = ORIGINAL_DF[columns]
             df = df.round(decimals=3)
             data_table = {'header': columns, 'rows': df.values.tolist()}
+
         return render_template('compare.html', cell_lines=CELL_LINES, x_axis=x_axis, y_axis_multiple=y_axis_multiple,
                                plot_series=plot_series, how_to_plot=how_to_plot, data_table=data_table)

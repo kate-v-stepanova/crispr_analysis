@@ -92,7 +92,8 @@ $(document).ready(function() {
                         pointFormat: '<b>gene:</b> {point.gene_id}<br><b>' + x_axis + ' fc:</b> {point.x:.3f}<br><b>' +
                                     '<br><b>' + x_axis + ' p value: </b> {point.x_pval:.3f}' +
                                     '<br><b>{series.name} fc:</b> {point.y:.3f}' +
-                                    '<br><b>{series.name} p value: </b> {point.y_pval:.3f}',
+                                    '<br><b>{series.name} p value: </b> {point.y_pval:.3f}' +
+                                    '<br><b>number of genes:</b> {series.data.length}',
                     }
                 }
             },
