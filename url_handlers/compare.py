@@ -24,7 +24,7 @@ def compare_cell_lines():
             df.columns = ['gene_id', 'x', 'y', 'x_pval', 'y_pval']
             df = df.round(decimals=3)
             plot_series[cell_line] = {
-                'name': '{} vs {}'.format(x_axis, cell_line),
+                'name': '{}'.format(cell_line),
                 'data': list(df.T.to_dict().values()),
                 'turboThreshold': len(df)
             }

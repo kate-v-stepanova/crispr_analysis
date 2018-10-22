@@ -91,8 +91,8 @@ $(document).ready(function() {
                     tooltip: {
                         pointFormat: '<b>gene:</b> {point.gene_id}<br><b>' + x_axis + ' fc:</b> {point.x:.3f}<br><b>' +
                                     '<br><b>' + x_axis + ' p value: </b> {point.x_pval:.3f}' +
-                                    '<br><b>' + y_axis[i] + ' fc:</b> {point.y:.3f}' +
-                                    '<br><b>' + y_axis[i] + ' p value: </b> {point.y_pval:.3f}',
+                                    '<br><b>{series.name} fc:</b> {point.y:.3f}' +
+                                    '<br><b>{series.name} p value: </b> {point.y_pval:.3f}',
                     }
                 }
             },
@@ -107,6 +107,23 @@ $(document).ready(function() {
           $('#data_filters').removeClass('d-none');
         } else {
             $('#data_filters').addClass('d-none');
+        }
+    });
+
+    $(document).on('change', '#first_cell_line', function() {
+        var cell_line = $('#first_cell_line').val();
+        if (cell_line != 'select_cell_line') {
+            $('#x_axis_filter').find('h2').text('X Axis Filter: ' + cell_line);
+//            $('#x_axis_filter').find('h4').first().text(cell_line + '.FC value');
+//            $('#x_axis_filter').find('h4').last().text(cell_line + '.P value');
+        }
+    });
+    $(document).on('change', '#multiple_cell_lines', function() {
+        var cell_line = $('#multiple_cell_lines').val();
+        if (cell_line != 'select_cell_line') {
+            $('#y_axis_filter').find('h2').text('Y Axis Filter: ' + cell_line);
+//            $('#y_axis_filter').find('h4').first().text(cell_line + '.FC value');
+//            $('#y_axis_filter').find('h4').last().text(cell_line + '.P value');
         }
     });
 });
