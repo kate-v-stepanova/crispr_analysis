@@ -14,7 +14,6 @@
          area-labelledby="settings_header" data-parent="#accordion">
       <div class="card-body">
         <form action="" method="POST">
-          {{ selected_cell_line }}
           <label for="cell_line_select">Select cell line:</label>
           <select name="cell_line" class="custom-select" id="cell_line_select">
             <option value="select_cell_line" {% if not plot_series %}selected{% endif %}>
