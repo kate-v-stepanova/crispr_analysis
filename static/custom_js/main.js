@@ -16,11 +16,8 @@ $(document).ready(function() {
     if (GENES.length != 0) {
         // initializing plot
         var cell_line = $('#cell_line_select').val();
-        // setting up the max number of points
-        var turbo_threshold = GENES.length;
 
         var p_values = $('input:radio:checked').val();
-        console.log(p_values);
 
         Highcharts.chart('cell_line_chart', {
             chart: {
@@ -73,11 +70,7 @@ $(document).ready(function() {
                     }
                 }
             },
-            series: [{
-                name: cell_line,
-                data: PLOT_SERIES,
-                turboThreshold: turbo_threshold,
-            }]
+            series: PLOT_SERIES
         });
     }
 });

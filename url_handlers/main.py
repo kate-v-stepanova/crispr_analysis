@@ -1,6 +1,7 @@
 import math
 
 from flask import Blueprint, render_template, request
+import pandas as pd
 
 main_page = Blueprint('main', __name__)
 
@@ -22,20 +23,27 @@ def show_scatter_plot():
         df.y.astype(float)
         df.p_value.astype(float)
         df = df.round(decimals=3)
-        if p_values == 'display':
-            plot_series = list(df.T.to_dict().values())
-
-        if p_values == 'drop':
-            # replace 0 with nans and drop nan from p_val columns
-            df = df.replace(0, pd.np.nan).dropna(axis=0, how="any", subset=['p_value'])
-            plot_series = list(df.T.to_dict().values())
 
         if p_values == 'highlight':
-            zero_df = df.loc[df['y'] == 0]
-            zero_df['name'] = pd.Series(cell_line)
-            non_zero_df = df.loc[df['y'] != 0]
-            non_zero_df['name'] = pd.Series('{}_with_zero_p_values'.format(cell_line))
-            plot_series = list(non_zero_df.T.to_dict().values()) + list(zero_df.T.to_dict().values())
+            zero_df = df.loc[df['p_value'] == 0]
+            non_zero_df = df.loc[df['p_value'] != 0]
+            plot_series = [{
+                'name': cell_line,
+                'turboThreshold': len(non_zero_df),
+                'data': list(non_zero_df.T.to_dict().values())
+            }, {
+                'name': '{} with zero p_values'.format(cell_line),
+                'turboThreshold': len(zero_df),
+                'data': list(zero_df.T.to_dict().values())
+            }]
+
+        if p_values == 'display_only':
+            df = df.loc[df['p_value'] == 0]
+            plot_series = {
+                'name': cell_line,
+                'turboThreshold': len(df),
+                'data': list(df.T.to_dict().values())
+            }
 
         return render_template('main.html', cell_lines=CELL_LINES, genes=GENES, plot_series=plot_series,
                                selected_cell_line=cell_line, p_values=p_values)
