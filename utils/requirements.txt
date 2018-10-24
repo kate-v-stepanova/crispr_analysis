@@ -1,0 +1,6 @@
+flask
+pandas
+redis
+redis-server
+flask-redis
+click

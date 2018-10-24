@@ -8,4 +8,4 @@ fi
 source activate crispr_analysis
 export FLASK_APP=crispr_analysis.py
 export FLASK_ENV=development
-flask run
+flask run --host 0.0.0.0
