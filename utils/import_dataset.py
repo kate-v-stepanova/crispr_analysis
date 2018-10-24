@@ -2,12 +2,19 @@ import click
 import redis
 import pandas as pd
 
-@click.command()
-@click.option('--host', default='127.0.0.1')
-@click.option('--port', default='6379')
+@click.group()
+def cli():
+    # do nothing
+    pass
+
+
+@cli.command()
 @click.argument('input_file')
-def import_dataset(host, port, input_file):
-    rdb = redis.StrictRedis(host=host, port=port)
+def init(input_file):
+    # default host: 127.0.0.1, default port: 6379.
+    # to change, use redis.StrictRedis(host=HOST, port=PORT)
+    # but we are not going to change this
+    rdb = redis.StrictRedis()
 
     df = pd.read_csv(input_file, sep='\t')
     header = list(df.columns)
@@ -31,5 +38,10 @@ def import_dataset(host, port, input_file):
         rdb.set(cell_line, current_df[columns_to_rename].to_msgpack(compress='zlib'))
 
 
+@cli.command()
+def flush():
+    rdb = redis.StrictRedis()
+    rdb.flushall()
+
 if __name__ == '__main__':
-    import_dataset()
+    cli()
