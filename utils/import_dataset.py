@@ -18,12 +18,18 @@ def init(input_file):
 
     df = pd.read_csv(input_file, sep='\t')
     header = list(df.columns)
+
+    genes = df['gene_id'].tolist()
     cell_lines = []
+
     for column in header:
         if '_fc' in column:
             cell_line = column.split('_fc')[0]
             if cell_line not in cell_lines:
                 cell_lines.append(cell_line)
+
+    rdb.sadd('cell_lines', *set(cell_lines))
+    rdb.sadd('genes', *set(genes))
 
     for cell_line in cell_lines:
         inc_ess = 'increasedEssential_{}'.format(cell_line)
@@ -35,7 +41,7 @@ def init(input_file):
         # rename the columns
         columns_to_rename = ['gene_id', 'fc', 'pval', 'inc_ess']
         current_df.columns = columns_to_rename
-        rdb.set(cell_line, current_df[columns_to_rename].to_msgpack(compress='zlib'))
+        rdb.set(cell_line, current_df[columns_to_rename].to_msgpack(encoding='utf-8'))
 
 
 @cli.command()

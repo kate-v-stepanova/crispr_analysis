@@ -7,15 +7,25 @@ main_page = Blueprint('main', __name__)
 
 @main_page.route('/', methods=['GET', 'POST'])
 def show_scatter_plot():
-    from crispr_analysis import CELL_LINES, ORIGINAL_DF, GENES
+    from crispr_analysis import get_db
+    rdb = get_db()
+
+
+    cell_lines = rdb.smembers('cell_lines')
+    genes = rdb.smembers('genes')
+
+    # stupid shit I don't want to do it why the fuck it doesnt return normal strings
+    cell_lines = [cell_line.decode('utf-8') for cell_line in cell_lines]
+    genes = [gene.decode('utf-8') for gene in genes] # 13 thousand lines
 
     if request.method == 'GET':
-        return render_template('main.html', cell_lines=CELL_LINES)
+        return render_template('main.html', cell_lines=cell_lines)
 
     if request.method == 'POST':
         cell_line = request.form.get('cell_line')
-        columns = ['gene_id', '{}_fc'.format(cell_line), '{}_pval'.format(cell_line)]
-        df = ORIGINAL_DF[columns]
+        df = pd.read_msgpack(rdb.get(cell_line))
+
+        df = df[['gene_id', 'fc', 'pval']] #, 'inc_ess']
         p_values = request.form['p_values']
 
         # transforming to highcharts format
@@ -45,6 +55,7 @@ def show_scatter_plot():
                 'data': list(df.T.to_dict().values())
             }
 
-        return render_template('main.html', cell_lines=CELL_LINES, genes=GENES, plot_series=plot_series,
+
+        return render_template('main.html', cell_lines=cell_lines, genes=genes, plot_series=plot_series,
                                selected_cell_line=cell_line, p_values=p_values)
 
