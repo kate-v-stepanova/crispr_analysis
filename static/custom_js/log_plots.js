@@ -56,20 +56,14 @@ $(document).ready(function() {
                         }
                     },
                     tooltip: {
-                        headerFormat: '<b>gene: {point.name}</b><br>',
-                        pointFormat: '<b>log2(pval):</b> {point.y}<br><b>-log10(fc):</b> {point.x}<br>' +
+                        headerFormat: '<b>cell line: {point.series.name}</b><br>',
+                        pointFormat: '<b>gene: {point.gene_id}</b><br>' +
+                                '<b>log2(pval):</b> {point.y}<br><b>-log10(fc):</b> {point.x}<br>' +
                                     '<b>p value:</b> {point.pval}<br><b>fc:</b> {point.fc}',
-                        formatter: function() {
-                          return 'p value: <b>' + this.point.pval + '</b><br>fc value: <b>' + this.point.fc +'</b>';
-                        },
                     }
                 }
             },
-            series: [{
-                name: cell_line,
-                data: PLOT_SERIES,
-                turboThreshold: turbo_threshold,
-            }]
+            series: PLOT_SERIES,
         });
     }
 });
