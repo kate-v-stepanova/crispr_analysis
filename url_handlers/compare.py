@@ -22,8 +22,8 @@ def compare_cell_lines():
         y_axis_multiple = request.form.getlist('y_axis_multiple')
 
         x_axis_df = pd.read_msgpack(rdb.get(x_axis))
-        x_axis_df = x_axis_df[['gene_id', 'fc', 'pval']]
-        x_axis_df.columns = ['gene_id', 'x', 'x_pval']
+        x_axis_df = x_axis_df[['gene_id', 'fc', 'pval']].set_index('gene_id')
+        x_axis_df.columns = ['x', 'x_pval']
 
         # here it doesn't matter how to plot, the data will be the same
         how_to_plot = request.form.get('how_to_plot')
@@ -31,18 +31,22 @@ def compare_cell_lines():
         show_data_table = request.form.get('show_data_table') is not None
         if show_data_table:
             data_table = x_axis_df.copy()
-            data_table.columns = ['gene_id', '{}_fc'.format(x_axis), '{}_pval'.format(x_axis)]
+            data_table.columns = ['{}_fc'.format(x_axis), '{}_pval'.format(x_axis)]
+
         for cell_line in y_axis_multiple:
-            y_axis_df = pd.read_msgpack(rdb.get(cell_line))
-            y_axis_df = y_axis_df[['gene_id', 'fc', 'pval']]
-            y_axis_df.columns = ['gene_id', 'y', 'y_pval']
-            df = pd.concat([x_axis_df, y_axis_df])
+            y_axis_df = pd.read_msgpack(rdb.get(cell_line)).set_index('gene_id')
+            y_axis_df = y_axis_df[['fc', 'pval']]
+            y_axis_df.columns = ['y', 'y_pval']
+            df = pd.concat([x_axis_df, y_axis_df], axis=1, join='inner')
             df = df.round(decimals=3)
 
-            # add to data_table
+            # add to data_table without filters
             if show_data_table:
-                y_axis_df.columns = ['gene_id', '{}_fc'.format(cell_line), '{}_pval'.format(cell_line)]
-                data_table = pd.concat([data_table, y_axis_df]) # todo: maybe need to copy y_axis_df
+                y_copy = y_axis_df.copy()
+                y_copy.columns = ['{}_fc'.format(cell_line), '{}_pval'.format(cell_line)]
+                data_table = pd.concat([data_table, y_copy], axis=1, join='inner')
+                # data_table = new_data_table
+
             # apply filters
             apply_filters = request.form.get('apply_filters') is not None
             if apply_filters:
@@ -65,6 +69,10 @@ def compare_cell_lines():
                 'turboThreshold': len(df)
             }
         if show_data_table:
+            sequence = ['gene_id'] + list(data_table.columns)
+            data_table['gene_id'] = data_table.index
+            data_table = data_table.reindex(columns=sequence)
+            data_table = data_table.round(decimals=3)
             data_table = {'header': data_table.columns, 'rows': data_table.values.tolist()}
 
         return render_template('compare.html', cell_lines=cell_lines, x_axis=x_axis, y_axis_multiple=y_axis_multiple,
