@@ -1,4 +1,19 @@
 $(document).ready(function() {
+    // prettify multiselect
+    var choices = new Choices('#multiple_cell_lines', {
+        allowSearch: true,
+        removeItemButton: true
+    });
+
+
+    $(document).on('change', '#apply_filters', function() {
+        if(this.checked) {
+          $('#data_filters').removeClass('d-none');
+        } else {
+            $('#data_filters').addClass('d-none');
+        }
+    });
+
     // initializing constants and removing attributes from html elements
     var PLOT_SERIES = $('#cell_line_chart').attr('data-plot-series').replace(/'/g, '"'); //");
     if (PLOT_SERIES.length != 0) {
@@ -15,17 +30,14 @@ $(document).ready(function() {
 
     if (GENES.length != 0) {
         // initializing plot
-        var cell_line = $('#cell_line_select').val();
-
-        var p_values = $('input:radio:checked').val();
-
+        var cell_lines = $('#multiple_cell_lines').val();
         Highcharts.chart('cell_line_chart', {
             chart: {
                 type: 'scatter',
                 zoomType: 'xy'
             },
             title: {
-                text: 'Fold change values for cell line <b>' + cell_line + '</b>'
+                text: 'Fold change values for <b>' + cell_lines + '</b>'
             },
             xAxis: {
                 title: {
@@ -61,12 +73,9 @@ $(document).ready(function() {
                         }
                     },
                     tooltip: {
-                        headerFormat: '<b>gene: {point.x}</b><br>',
-                        pointFormat: '<b>fc value:</b> {point.y}<br><b>p value:</b> {point.p_value}',
-//                        pointFormat: '<b>fc value:</b> {point.y:.3f}<br><b>p value:</b> {point.value:.3f}',
-                        formatter: function() {
-                          return 'pvalue: <b>' + this.point.p_value + '</b>';
-                        },
+                        headerFormat: '<b>gene: {point.x}</b><br><b>cell line: {series.name}<br></b>',
+                        pointFormat: '<b>fc value:</b> {point.y}<br><b>p value:</b> {point.p_value}' +
+                                    '<br><b>increased Essentiality:</b> {point.inc_ess}',
                     }
                 }
             },
