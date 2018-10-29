@@ -80,5 +80,12 @@ def show_scatter_plot():
                 'series_length': series_length
             })
 
+        show_data_table = request.form.get('show_data_table') is not None
+        data_table = None
+        if show_data_table:
+            data_table = {
+                'header': joint_df.columns,
+                'rows': joint_df.values.tolist(),
+            }
         return render_template('main.html', cell_lines=cell_lines, genes=genes, plot_series=plot_series,
-                               selected_cell_lines=selected_cell_lines)
+                               selected_cell_lines=selected_cell_lines, data_table=data_table)

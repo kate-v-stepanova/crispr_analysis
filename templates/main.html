@@ -24,6 +24,12 @@
             {% endfor %}
           </select>
 
+          {# show data table #}
+          <div class="form-check mt-10">
+            <input class="form-check-input" type="checkbox" value="true" id="show_data_table" name="show_data_table">
+            <label class="form-check-label" for="show_data_table">Show data table</label>
+          </div>
+
           {# filter data #}
           <div class="form-check mt-4">
             <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters">
@@ -127,6 +133,29 @@
       <div class="card-body">
         <div id="cell_line_chart" data-plot-series="{{ plot_series }}" data-genes="{{ genes }}"></div>
       </div>
+
+      {% if data_table %}
+      <div>
+        <table id="data_table" class="table table-striped table-bordered mt-4">
+          <thead>
+            <tr>
+              {% for header in data_table['header'] %}
+              <th>{{ header }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data_table['rows'] %}
+              <tr>
+                {% for column in row %}
+                <td>{{ column }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
