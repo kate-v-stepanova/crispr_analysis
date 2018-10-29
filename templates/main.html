@@ -37,19 +37,16 @@
               <h2>WT Filter</h2>
               <div class="list-group-item">
                 <h4 class="list-item-heading">FC value</h4>
-                <div class="list-group-item-text row">
-                  <div class="col-sm-4">
-                    <div class="custom-control custom-radio">
-                      <input type="radio" class="custom-control-input" id="wt_fc_less" name="wt_fc_less_or_greater" value="less">
-                      <label class="custom-control-label" for="wt_fc_less">Less than</label>
+                <div class="list-group-item-text">
+                  <div class="row">
+                    <div class="col-sm-4">
+                      <label class="mt-2" for="wt_fc_max">Max fc value:</label><br>
+                      <label class="mt-2" for="wt_fc_min">Min fc value:</label>
                     </div>
-                    <div class="custom-control custom-radio">
-                        <input type="radio" class="custom-control-input" id="wt_fc_greater" name="wt_fc_less_or_greater" value="greater" checked>
-                        <label class="custom-control-label" for="wt_fc_greater">Greater than</label>
+                    <div class="col-sm-8">
+                      <input class="form-control input-sm" type="number" name="wt_fc_max" min="0.0" step="0.01" value="1.5" id="wt_fc_max">
+                      <input class="form-control input-sm mt-1" type="number" name="wt_fc_min" min="0.0" step="0.01" value="0.67" id="wt_fc_min">
                     </div>
-                  </div>
-                  <div class="col-sm-8 mt-2">
-                    <input class="form-control" type="number" name="wt_fc_max" min="0.0" step="0.01" value="0.67" id="wt_fc_max">
                   </div>
                 </div>
               </div>
@@ -77,23 +74,22 @@
             <div class="list-group col-sm-6" id="y_axis_filter">
               <h2>Other Cell Lines Filter</h2>
               <div class="list-group-item">
+              {# FC value #}
               <h4 class="list-item-heading">FC value</h4>
-                <div class="list-group-item-text row">
-                  <div class="col-sm-4">
-                    <div class="custom-control custom-radio">
-                      <input type="radio" class="custom-control-input" id="y_fc_less" name="y_fc_less_or_greater" value="less" checked>
-                      <label class="custom-control-label" for="y_fc_less">Less than</label>
+                <div class="list-group-item-text">
+                  <div class="row">
+                    <div class="col-sm-4">
+                      <label class="mt-2" for="y_fc_max">Max fc value:</label><br>
+                      <label class="mt-2" for="y_fc_min">Min fc value:</label>
                     </div>
-                    <div class="custom-control custom-radio">
-                        <input type="radio" class="custom-control-input" id="y_fc_greater" name="y_fc_less_or_greater" value="greater">
-                        <label class="custom-control-label" for="y_fc_greater">Greater than</label>
+                    <div class="col-sm-8">
+                      <input class="form-control input-sm" type="number" name="y_fc_max" min="0.0" step="0.01" value="0.67" id="y_fc_max">
+                      <input class="form-control input-sm mt-1" type="number" name="y_fc_min" min="0.0" step="0.01" value="0" id="y_fc_min">
                     </div>
-                  </div>
-                  <div class="col-sm-8 mt-2">
-                    <input class="form-control" type="number" name="y_fc_max" min="0.0" step="0.01" value="0.67" id="y_fc_max">
                   </div>
                 </div>
               </div>
+              {# P VALUE #}
               <div class="list-group-item">
               <h4 class="list-item-heading">P value</h4>
                 <div class="list-group-item-text row">

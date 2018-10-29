@@ -54,6 +54,11 @@ $(document).ready(function() {
                     text: 'Fold change'
                 }
             },
+            legend: {
+                labelFormatter: function () {
+                    return this.name + ': ' + this.options.series_length +' genes <i>(click to hide)</i>';
+                }
+            },
             plotOptions: {
                 scatter: {
                     marker: {
@@ -74,7 +79,7 @@ $(document).ready(function() {
                     },
                     tooltip: {
                         headerFormat: '<b>gene: {point.x}</b><br><b>cell line: {series.name}<br></b>',
-                        pointFormat: '<b>fc value:</b> {point.y}<br><b>p value:</b> {point.p_value}' +
+                        pointFormat: '<b>fc value:</b> {point.y}<br><b>p value:</b> {point.pval}' +
                                     '<br><b>increased Essentiality:</b> {point.inc_ess}',
                     }
                 }
