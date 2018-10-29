@@ -22,58 +22,73 @@ def compare_cell_lines():
         y_axis_multiple = request.form.getlist('y_axis_multiple')
 
         x_axis_df = pd.read_msgpack(rdb.get(x_axis))
-        x_axis_df = x_axis_df[['gene_id', 'fc', 'pval']].set_index('gene_id')
-        x_axis_df.columns = ['x', 'x_pval']
+        x_axis_df = x_axis_df[['gene_id', 'fc', 'pval']]
+        x_axis_df.columns = ['gene_id', 'x', 'x_pval']
+        x_axis_df = x_axis_df.round(decimals=3)
 
         # here it doesn't matter how to plot, the data will be the same
         how_to_plot = request.form.get('how_to_plot')
-        plot_series = {}
         show_data_table = request.form.get('show_data_table') is not None
-        if show_data_table:
-            data_table = x_axis_df.copy()
-            data_table.columns = ['{}_fc'.format(x_axis), '{}_pval'.format(x_axis)]
 
+        # filters
+        apply_filters = request.form.get('apply_filters') is not None
+        wt_fc_max = float(request.form.get('wt_fc_max'))
+        wt_fc_min = float(request.form.get('wt_fc_min'))
+        wt_pval = float(request.form.get('wt_pval_max'))
+        wt_pval_less_or_greater = request.form.get('wt_pval_less_or_greater')
+        fc_max = float(request.form.get('y_fc_max'))
+        fc_min = float(request.form.get('y_fc_min'))
+        pval = float(request.form.get('y_pval_max'))
+        pval_less_or_greater = request.form.get('y_pval_less_or_greater')
+
+        joint_df = None
         for cell_line in y_axis_multiple:
-            y_axis_df = pd.read_msgpack(rdb.get(cell_line)).set_index('gene_id')
-            y_axis_df = y_axis_df[['fc', 'pval']]
-            y_axis_df.columns = ['y', 'y_pval']
-            df = pd.concat([x_axis_df, y_axis_df], axis=1, join='inner')
+            df = pd.read_msgpack(rdb.get(cell_line))
+            df = df[['gene_id', 'fc', 'pval', 'inc_ess']]
+            df.fc.astype(float)
+            df.pval.astype(float)
+
+
+            # apply_filters
+            if apply_filters:
+                if cell_line == 'WT':
+                    df = df.loc[df['fc'] >= wt_fc_min]
+                    df = df.loc[df['fc'] <= wt_fc_max]
+                    df = df.loc[df['pval'] >= wt_pval] if wt_pval_less_or_greater == 'greater' else df.loc[df['pval'] <= wt_pval]
+                else:
+                    df = df.loc[df['fc'] >= fc_min]
+                    df = df.loc[df['fc'] <= fc_max]
+                    df = df.loc[df['pval'] >= pval] if pval_less_or_greater == 'greater' else df.loc[df['pval'] <= pval]
+
             df = df.round(decimals=3)
 
-            # add to data_table without filters
-            if show_data_table:
-                y_copy = y_axis_df.copy()
-                y_copy.columns = ['{}_fc'.format(cell_line), '{}_pval'.format(cell_line)]
-                data_table = pd.concat([data_table, y_copy], axis=1, join='inner')
-                # data_table = new_data_table
+            df.columns = ['gene_id', '{}_fc'.format(cell_line), '{}_pval'.format(cell_line),
+                    '{}_inc_ess'.format(cell_line)]
+            joint_df = df.copy() if joint_df is None else pd.merge(joint_df, df, how='outer', on='gene_id')
 
-            # apply filters
-            apply_filters = request.form.get('apply_filters') is not None
-            if apply_filters:
-                x_fc = float(request.form.get('x_fc_max'))
-                x_fc_less_or_greater = request.form.get('x_fc_less_or_greater')
-                x_pval = float(request.form.get('x_pval_max'))
-                x_pval_less_or_greater = request.form.get('x_pval_less_or_greater')
-                y_fc = float(request.form.get('y_fc_max'))
-                y_fc_less_or_greater = request.form.get('y_fc_less_or_greater')
-                y_pval = float(request.form.get('y_pval_max'))
-                y_pval_less_or_greater = request.form.get('y_pval_less_or_greater')
-                df = df.loc[df['x'] >= x_fc] if x_fc_less_or_greater == 'greater' else df.loc[df['x'] <= x_fc]
-                df = df.loc[df['y'] >= y_fc] if y_fc_less_or_greater == 'greater' else df.loc[df['y'] <= y_fc]
-                df = df.loc[df['x_pval'] >= x_pval] if x_pval_less_or_greater == 'greater' else df.loc[df['x_pval'] <= x_pval]
-                df = df.loc[df['y_pval'] >= y_pval] if y_pval_less_or_greater == 'greater' else df.loc[df['y_pval'] <= y_pval]
-
-            plot_series[cell_line] = {
-                'name': '{}'.format(cell_line),
+        plot_series = []
+        for cell_line in y_axis_multiple:
+            df = joint_df[['gene_id', '{}_fc'.format(cell_line),
+                           '{}_pval'.format(cell_line), '{}_inc_ess'.format(cell_line)]]
+            df.columns = ['gene_id', 'y', 'y_pval', 'inc_ess']
+            series_length = len(df.dropna())
+            df = df.fillna('null')
+            df = pd.merge(df, x_axis_df, how='inner', on='gene_id')
+            plot_series.append({
+                'name': cell_line,
                 'data': list(df.T.to_dict().values()),
-                'turboThreshold': len(df)
-            }
+                'turboThreshold': len(df),
+                'series_length': series_length
+            })
+
+        data_table = None
         if show_data_table:
-            sequence = ['gene_id'] + list(data_table.columns)
-            data_table['gene_id'] = data_table.index
-            data_table = data_table.reindex(columns=sequence)
-            data_table = data_table.round(decimals=3)
-            data_table = {'header': data_table.columns, 'rows': data_table.values.tolist()}
+            x_axis_df.columns = ['gene_id', '{}_fc'.format(x_axis), '{}_pval'.format(x_axis)]
+            df = pd.merge(x_axis_df, joint_df, on='gene_id', how='inner')
+            data_table = {
+                'header': df.columns,
+                'rows': df.values.tolist()
+            }
 
         return render_template('compare.html', cell_lines=cell_lines, x_axis=x_axis, y_axis_multiple=y_axis_multiple,
                                plot_series=plot_series, how_to_plot=how_to_plot, data_table=data_table)
