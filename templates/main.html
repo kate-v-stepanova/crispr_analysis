@@ -4,6 +4,7 @@
 <script src="{{ url_for('static', filename='js/choices.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
 <script src="{{ url_for('static', filename='custom_js/main.js') }}"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
 <div id="accordion">
   <div class="card">
     <div class="card-header" id="settings_header">
@@ -26,13 +27,29 @@
 
           {# show data table #}
           <div class="form-check mt-10">
-            <input class="form-check-input" type="checkbox" value="true" id="show_data_table" name="show_data_table">
+            <input class="form-check-input" type="checkbox" value="true" id="show_data_table" name="show_data_table"
+              {% if data_table %} checked {% endif %}>
             <label class="form-check-label" for="show_data_table">Show data table</label>
+          </div>
+
+          {# include normalized counts #}
+          <div class="form-check mt-10">
+            <input class="form-check-input" type="checkbox" value="true" id="include_counts" name="include_counts"
+              {% if counts_series is not none %} checked {% endif %}>
+            <label class="form-check-label" for="include_counts">Include normalized counts</label>
+          </div>
+
+          {# increased essentiality #}
+          <div class="form-check mt-10">
+            <input class="form-check-input" type="checkbox" value="true" id="increased_essentiality"
+                {% if increased_essentiality %} checked {% endif %} name="increased_essentiality">
+            <label class="form-check-label" for="increased_essentiality">With increased essentiality only</label>
           </div>
 
           {# filter data #}
           <div class="form-check mt-4">
-            <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters">
+            <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters"
+              {% if apply_filters %} checked {% endif %}>
             <label class="form-check-label" for="apply_filters">Apply filters</label>
           </div>
 
@@ -133,6 +150,12 @@
       <div class="card-body">
         <div id="cell_line_chart" data-plot-series="{{ plot_series }}" data-genes="{{ genes }}"></div>
       </div>
+      {% if counts_series %}
+      {% for gene in genes[0:5] %}
+        <div id="{{ gene }}" data-plot-series="{{ counts_series[gene] }}">
+        </div>
+      {% endfor %}
+      {% endif %}
 
       {% if data_table %}
       <div>

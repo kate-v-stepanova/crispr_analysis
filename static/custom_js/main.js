@@ -23,7 +23,6 @@ $(document).ready(function() {
     if (GENES.length != 0) {
         GENES = JSON.parse(GENES);
     }
-
     // removing attributes
     $('#cell_line_chart').removeAttr('data-genes');
     $('#cell_line_chart').removeAttr('data-plot-series');
@@ -86,5 +85,47 @@ $(document).ready(function() {
             },
             series: PLOT_SERIES
         });
+    }
+
+    // check normalized counts
+    if (GENES.length != 0) {
+        for (i=0; i<5; i++) {
+            var container_id = GENES[i];
+            var gene_series = $('#'+container_id).attr('data-plot-series');
+            if (gene_series) {
+                gene_series = gene_series.replace(/'/g, '"'); //");
+                gene_series = JSON.parse(gene_series);
+
+                Highcharts.chart(container_id, {
+
+                    chart: {
+                        type: 'boxplot'
+                    },
+
+                    title: {
+                        text: 'Normalized Counts for gene: ' + container_id
+                    },
+
+                    legend: {
+                        enabled: true
+                    },
+
+                    xAxis: {
+                        categories: cell_lines,
+                        title: {
+                            text: 'Cell Line'
+                        }
+                    },
+
+                    yAxis: {
+                        title: {
+                            text: 'Normalized counts'
+                        },
+                    },
+
+                    series: gene_series
+                });
+            }
+        }
     }
 });
