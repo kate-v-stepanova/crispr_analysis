@@ -96,67 +96,66 @@ def show_scatter_plot():
                 'rows': joint_df.values.tolist(),
             }
 
-        include_counts = request.form.get('include_counts') is not None
+        # data for normalized counts
         counts_series = {}
-        if include_counts:
-            for gene in genes:
-                gene_df = pd.read_msgpack(rdb.get('{}_counts'.format(gene)))
-                series_before = []
-                series_after = []
-                outliers = []
-                for i in range(len(selected_cell_lines)):
-                    cell_line = selected_cell_lines[i]
-                    key = 'RPE_{}'.format(cell_line)
-                    df = gene_df.loc[gene_df['cell_line'] == key]
+        for gene in genes:
+            gene_df = pd.read_msgpack(rdb.get('{}_counts'.format(gene)))
+            series_before = []
+            series_after = []
+            outliers = []
+            for i in range(len(selected_cell_lines)):
+                cell_line = selected_cell_lines[i]
+                key = 'RPE_{}'.format(cell_line)
+                df = gene_df.loc[gene_df['cell_line'] == key]
 
-                    # keep only the ones that are within +3 to -3 standard deviations
-                    without_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) <= (3 * df.norm_counts.std())]
-                    only_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) > (3 * df.norm_counts.std())]
-                    before = without_outliers.loc[without_outliers['treatment'] == 0]
-                    after = without_outliers.loc[without_outliers['treatment'] == 1]
+                # keep only the ones that are within +3 to -3 standard deviations
+                without_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) <= (3 * df.norm_counts.std())]
+                only_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) > (3 * df.norm_counts.std())]
+                before = without_outliers.loc[without_outliers['treatment'] == 0]
+                after = without_outliers.loc[without_outliers['treatment'] == 1]
 
-                    # calculate boxplot data
-                    q1, median, q3 = before.norm_counts.quantile([0.25, 0.5, 0.75]).round(decimals=3).tolist()
-                    series_before.append([
-                        before['norm_counts'].min(),
+                # calculate boxplot data
+                q1, median, q3 = before.norm_counts.quantile([0.25, 0.5, 0.75]).round(decimals=3).tolist()
+                series_before.append([
+                    before['norm_counts'].min(),
+                    q1,
+                    median,
+                    q3,
+                    before['norm_counts'].max()])
+                q1, median, q3 = after.norm_counts.quantile([0.25, 0.5, 0.75]).tolist()
+                series_after.append([
+                        after['norm_counts'].min(),
                         q1,
                         median,
                         q3,
-                        before['norm_counts'].max()])
-                    q1, median, q3 = after.norm_counts.quantile([0.25, 0.5, 0.75]).tolist()
-                    series_after.append([
-                            after['norm_counts'].min(),
-                            q1,
-                            median,
-                            q3,
-                            after['norm_counts'].max()])
-                    for index, row in only_outliers.iterrows():
-                        x = i
-                        y = round(row['norm_counts'], 3)
-                        treatment = 'Before Treatment' if int(row['treatment']) == 0 else 'After Treatment'
-                        outliers.append({
-                            'x': x,
-                            'y': y,
-                            'treatment': treatment,
-                            'cell_line': cell_line,
-                            'color': 'black' if treatment == 'After Treatment' else '#7cb5ec'
-                        })
-                counts_series[gene] = [{
-                        'name': 'Before Treatment',
-                        'data': series_before,
-                        'color': '#7cb5ec',
-                    }, {
-                        'name': 'After Treatment',
-                        'data': series_after,
-                        'color': 'black',
-                    }, {'name': 'Outliers',
-                        'type': 'scatter',
-                        'data': outliers,
-                        'tooltip': {
-                            'pointFormat': '<br>cell line: {point.cell_line}<br>norm. counts: {point.y}<br>treatment: {point.treatment}',
-                        }
+                        after['norm_counts'].max()])
+                for index, row in only_outliers.iterrows():
+                    x = i
+                    y = round(row['norm_counts'], 3)
+                    treatment = 'Before Treatment' if int(row['treatment']) == 0 else 'After Treatment'
+                    outliers.append({
+                        'x': x,
+                        'y': y,
+                        'treatment': treatment,
+                        'cell_line': cell_line,
+                        'color': 'black' if treatment == 'After Treatment' else '#7cb5ec'
+                    })
+            counts_series[gene] = [{
+                    'name': 'Before Treatment',
+                    'data': series_before,
+                    'color': '#7cb5ec',
+                }, {
+                    'name': 'After Treatment',
+                    'data': series_after,
+                    'color': 'black',
+                }, {'name': 'Outliers',
+                    'type': 'scatter',
+                    'data': outliers,
+                    'tooltip': {
+                        'pointFormat': '<br>cell line: {point.cell_line}<br>norm. counts: {point.y}<br>treatment: {point.treatment}',
                     }
-                ]
+                }
+            ]
         return render_template('main.html', cell_lines=cell_lines, genes=genes, plot_series=plot_series,
                                selected_cell_lines=selected_cell_lines, data_table=data_table, counts_series=counts_series,
                                increased_essentiality=increased_essentiality, apply_filters=apply_filters)

@@ -27,10 +27,18 @@ $(document).ready(function() {
     $('#cell_line_chart').removeAttr('data-genes');
     $('#cell_line_chart').removeAttr('data-plot-series');
 
+
+    // init boxplot data as well
+    var NORM_COUNTS = $('#boxplot_data').attr('data-plot-series').replace(/'/g, '"'); //");
+    if (NORM_COUNTS.length != 0) {
+        NORM_COUNTS = JSON.parse(NORM_COUNTS);
+    };
+    $('#boxplot_data').removeAttr('data-plot-series');
+
     if (GENES.length != 0) {
         // initializing plot
         var cell_lines = $('#multiple_cell_lines').val();
-        Highcharts.chart('cell_line_chart', {
+        var chart = Highcharts.chart('cell_line_chart', {
             chart: {
                 type: 'scatter',
                 zoomType: 'xy'
@@ -60,6 +68,11 @@ $(document).ready(function() {
             },
             plotOptions: {
                 scatter: {
+                    point: {
+                        events: {
+                            click: renderBoxplot
+                        }
+                    },
                     marker: {
                         radius: 5,
                         states: {
@@ -79,53 +92,69 @@ $(document).ready(function() {
                     tooltip: {
                         headerFormat: '<b>gene: {point.x}</b><br><b>cell line: {series.name}<br></b>',
                         pointFormat: '<b>fc value:</b> {point.y}<br><b>p value:</b> {point.pval}' +
-                                    '<br><b>increased Essentiality:</b> {point.inc_ess}',
+                                    '<br><b>increased Essentiality:</b> {point.inc_ess}<br>(click to see norm. counts)',
                     }
                 }
             },
             series: PLOT_SERIES
         });
     }
+    function renderBoxplot(e) {
+        $('#boxplot_data').removeClass('col-sm-0').addClass('col-sm-4');
+        $('#boxplot_data').removeClass('d-none');
+        $('#cell_line_chart').removeClass('col-sm-12').addClass('col-sm-8');
+        var chart_width = $('#cell_line_chart').width();
+        var chart_height = chart.height;
+        chart.setSize(chart_width, chart_height, doAnimation=true);
+        var gene = this.name;
+        var gene_series = NORM_COUNTS[gene];
+        $('#hide_counts').removeClass('d-none');
+        Highcharts.chart('boxplot_data', {
+            chart: {
+                type: 'boxplot'
+            },
+            title: {
+                text: 'Normalized Counts for gene: ' + gene
+            },
 
-    // check normalized counts
-    if (GENES.length != 0) {
-        for (i=0; i<5; i++) {
-            var container_id = GENES[i];
-            var gene_series = $('#'+container_id).attr('data-plot-series');
-            if (gene_series) {
-                gene_series = gene_series.replace(/'/g, '"'); //");
-                gene_series = JSON.parse(gene_series);
+            legend: {
+                enabled: true
+            },
 
-                Highcharts.chart(container_id, {
+            xAxis: {
+                categories: cell_lines,
+                title: {
+                    text: 'Cell Line'
+                }
+            },
 
-                    chart: {
-                        type: 'boxplot'
-                    },
+            yAxis: {
+                title: {
+                    text: 'Normalized counts'
+                },
+            },
 
-                    title: {
-                        text: 'Normalized Counts for gene: ' + container_id
-                    },
-
-                    legend: {
-                        enabled: true
-                    },
-
-                    xAxis: {
-                        categories: cell_lines,
-                        title: {
-                            text: 'Cell Line'
-                        }
-                    },
-
-                    yAxis: {
-                        title: {
-                            text: 'Normalized counts'
-                        },
-                    },
-
-                    series: gene_series
-                });
-            }
-        }
+            legend: {
+                labelFormatter: function() {
+                    if (this.name == 'Outliers') {
+                        return '';
+                    } else {
+                        return this.name;
+                    }
+                }
+            },
+            series: gene_series
+        });
     }
+
+    // resize cell_line_chart when hide counts
+    $('#hide_counts').on('click', function() {
+        $('#hide_counts').addClass('d-none');
+        $('#boxplot_data').addClass('d-none');
+        $('#boxplot_data').removeClass('col-sm-4').addClass('col-sm-0');
+        $('#cell_line_chart').removeClass('col-sm-0').addClass('col-sm-12');
+        var chart_width = $('#cell_line_chart').width();
+        var chart_height = chart.height;
+        chart.setSize(chart_width, chart_height, doAnimation=true);
+    });
 });
