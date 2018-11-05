@@ -22,6 +22,7 @@ def show_scatter_plot():
     if request.method == 'POST':
         selected_cell_lines = request.form.getlist('cell_lines')
         increased_essentiality = request.form.get('increased_essentiality') is not None
+        show_data_table = request.form.get('show_data_table') is not None
 
         # filters
         apply_filters = request.form.get('apply_filters') is not None
@@ -36,11 +37,22 @@ def show_scatter_plot():
 
         joint_df = None
         wt_df = None
+        full_df = None
         for cell_line in selected_cell_lines:
             df = pd.read_msgpack(rdb.get(cell_line))
             df = df[['gene_id', 'fc', 'pval', 'inc_ess']]
             df.fc.astype(float)
             df.pval.astype(float)
+
+            if show_data_table:
+                # to fill the data table correctly
+                to_merge = df.copy() if cell_line != 'WT' else df[['gene_id', 'fc', 'pval']]
+                to_merge = to_merge.round(decimals=3)
+                columns = ['gene_id', '{}_fc'.format(cell_line), '{}_pval'.format(cell_line)]
+                if cell_line != 'WT':
+                    columns.append('{}_inc_ess'.format(cell_line))
+                to_merge.columns = columns
+                full_df = to_merge if full_df is None else pd.merge(full_df, to_merge, how='outer', on='gene_id')
 
             if increased_essentiality:
                 # this will also include 'n/a'
@@ -88,12 +100,14 @@ def show_scatter_plot():
                 'series_length': series_length
             })
 
-        show_data_table = request.form.get('show_data_table') is not None
         data_table = None
         if show_data_table:
+            genes = joint_df['gene_id'].tolist()
+            data_table_df = full_df[full_df['gene_id'].isin(genes)]
             data_table = {
-                'header': joint_df.columns,
-                'rows': joint_df.values.tolist(),
+                'header': data_table_df.columns,
+                'rows': data_table_df.values.tolist(),
+                'csv': data_table_df.to_csv(sep='\t', index=False)
             }
 
         # data for normalized counts
@@ -151,6 +165,7 @@ def show_scatter_plot():
                 }, {'name': 'Outliers',
                     'type': 'scatter',
                     'data': outliers,
+                    'color': 'black',
                     'tooltip': {
                         'pointFormat': '<br>cell line: {point.cell_line}<br>norm. counts: {point.y}<br>treatment: {point.treatment}',
                     }

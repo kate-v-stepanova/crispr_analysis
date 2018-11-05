@@ -4,7 +4,10 @@
 <script src="{{ url_for('static', filename='js/choices.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
 <script src="{{ url_for('static', filename='custom_js/main.js') }}"></script>
-<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="{{ url_for('static', filename='js/highcharts-more.js') }}"></script>
+{# export data table #}
+<script src="{{ url_for('static', filename='js/FileSaver.js') }}"></script>
+
 <div id="accordion">
   <div class="card">
     <div class="card-header" id="settings_header">
@@ -153,7 +156,8 @@
         </div>
         {% if data_table %}
         <div>
-          <table id="data_table" class="table table-striped table-bordered mt-4">
+          <button type="button" class="btn btn-sm btn-outline-info mb-0 float-right" id="export_button">Export Table</button>
+          <table id="data_table" class="table table-striped table-bordered mt-0" table-csv-data="{{ data_table['csv'] }}">
             <thead>
               <tr>
                 {% for header in data_table['header'] %}

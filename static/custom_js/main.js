@@ -157,4 +157,16 @@ $(document).ready(function() {
         var chart_height = chart.height;
         chart.setSize(chart_width, chart_height, doAnimation=true);
     });
+
+    var data_table = $('#data_table');
+    if (data_table.length != 0) {
+        var table_data = $(data_table).attr('table-csv-data');
+        $(data_table).removeAttr('table-csv-data');
+        $('#export_button').on('click', function() {
+            console.log('EXPORT');
+            console.log(table_data);
+            var blob = new Blob([table_data], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, cell_lines.join('_') + "_comparison.txt");
+        });
+    }
 });
