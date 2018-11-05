@@ -137,7 +137,7 @@ $(document).ready(function() {
             legend: {
                 labelFormatter: function() {
                     if (this.name == 'Outliers') {
-                        return '';
+                        return 'click to hide outliers';
                     } else {
                         return this.name;
                     }
