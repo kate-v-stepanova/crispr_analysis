@@ -163,8 +163,6 @@ $(document).ready(function() {
         var table_data = $(data_table).attr('table-csv-data');
         $(data_table).removeAttr('table-csv-data');
         $('#export_button').on('click', function() {
-            console.log('EXPORT');
-            console.log(table_data);
             var blob = new Blob([table_data], {type: "text/plain;charset=utf-8"});
             saveAs(blob, cell_lines.join('_') + "_comparison.txt");
         });

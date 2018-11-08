@@ -54,12 +54,6 @@ def show_scatter_plot():
                 to_merge.columns = columns
                 full_df = to_merge if full_df is None else pd.merge(full_df, to_merge, how='outer', on='gene_id')
 
-            if increased_essentiality:
-                # this will also include 'n/a'
-                df = df.loc[df['inc_ess'] != 'no']
-                # not sure yet how to handle series without these genes
-                # df = df.fillna('null')
-                # df = df.dropna()
 
             # apply_filters
             if apply_filters:
@@ -84,15 +78,43 @@ def show_scatter_plot():
 
         if wt_df is not None:
             joint_df = pd.merge(joint_df, wt_df, how='inner', on='gene_id')
+
+        # goodbye performance
+        null_rows = {}
+        if increased_essentiality:
+            inc_ess_columns = ['{}_inc_ess'.format(cell_line) for cell_line in selected_cell_lines if cell_line != 'WT']
+            rows_to_drop = []
+            for i, row in joint_df.iterrows():
+                if not(any(row[column] == 'yes' for column in inc_ess_columns)):
+                    rows_to_drop.append(i)
+
+                if i not in rows_to_drop:
+                    for column in inc_ess_columns:
+                        # print('column, value, gene: ', column, row[column], row['gene_id'])
+                        if row[column] == 'no' or row[column] == np.nan:
+                            # print('previous: ', row[column])
+                            cell_line = column.split('_inc_ess')[0]
+                            if cell_line not in null_rows:
+                                null_rows[cell_line] = []
+                            null_rows[cell_line].append(i)
+            joint_df = joint_df.drop(rows_to_drop)
+
         genes = list(joint_df['gene_id'])
 
         plot_series = []
         for cell_line in selected_cell_lines:
-            df = joint_df[['gene_id', '{}_fc'.format(cell_line),
-                           '{}_pval'.format(cell_line), '{}_inc_ess'.format(cell_line)]]
-            df.columns = ['name', 'y', 'pval', 'inc_ess']
+            columns = ['{}_fc'.format(cell_line),
+                           '{}_pval'.format(cell_line), '{}_inc_ess'.format(cell_line)]
+            df = joint_df[['gene_id'] + columns].copy()
+
+            # # ok, I give up here - it just doesnt work
+            # # will just show all points regardless
+            # if increased_essentiality and cell_line in null_rows:
+            #     df.loc[null_rows[cell_line], columns] = np.nan
+            
             series_length = len(df.dropna())
             df = df.fillna('null')
+            df.columns = ['name', 'y', 'pval', 'inc_ess']
             plot_series.append({
                 'name': cell_line,
                 'turboThreshold': len(df),
@@ -104,6 +126,7 @@ def show_scatter_plot():
         if show_data_table:
             genes = joint_df['gene_id'].tolist()
             data_table_df = full_df[full_df['gene_id'].isin(genes)]
+            data_table_df.insert(0, '#', range(1, len(data_table_df)+1))
             data_table = {
                 'header': data_table_df.columns,
                 'rows': data_table_df.values.tolist(),
