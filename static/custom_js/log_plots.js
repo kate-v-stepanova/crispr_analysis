@@ -18,11 +18,17 @@ $(document).ready(function() {
         var cell_line = $('#cell_line_select').val();
         // setting up the max number of points
         var turbo_threshold = GENES.length;
-
+        var left = $('#cell_line_chart').attr('data-left-line');
+        var right = $('#cell_line_chart').attr('data-right-line');
+        var bottom = $('#cell_line_chart').attr('data-bottom-line');
         Highcharts.chart('cell_line_chart', {
             chart: {
                 type: 'scatter',
-                zoomType: 'xy'
+                zoomType: 'xy',
+                height: 600,
+            },
+            legend: {
+                enabled: false
             },
             title: {
                 text: 'Fold change against p value for selected cell line:<b>' + cell_line + '</b>'
@@ -31,11 +37,38 @@ $(document).ready(function() {
                 title: {
                     text: 'log2(fc)'
                 },
+                plotLines: [{
+                    color: 'black',
+                    dashStyle: 'dash',
+                    value: right,
+                    width: 1,
+                    label: {
+                        text: 'log2(fc)=' + right,
+                    }
+                },
+                {
+                    color: 'black',
+                    dashStyle: 'dash',
+                    value: left,
+                    width: 1,
+                    label: {
+                        text: 'log2(fc)=' + left,
+                    }
+                }]
             },
             yAxis: {
                 title: {
                     text: '-log10(pval)'
-                }
+                },
+                plotLines: [{
+                    color: 'black',
+                    dashStyle: 'dash',
+                    value: bottom,
+                    width: 1,
+                    label: {
+                        text: '-log10(pval)=' + bottom,
+                    }
+                }]
             },
             plotOptions: {
                 scatter: {
@@ -56,10 +89,19 @@ $(document).ready(function() {
                         }
                     },
                     tooltip: {
-                        headerFormat: '<b>cell line: {point.series.name}</b><br>',
-                        pointFormat: '<b>gene: {point.gene_id}</b><br>' +
-                                '<b>log2(pval):</b> {point.y}<br><b>-log10(fc):</b> {point.x}<br>' +
-                                    '<b>p value:</b> {point.pval}<br><b>fc:</b> {point.fc}',
+                        headerFormat: '<b>cell line: ' + cell_line +'</b><br>',
+                        pointFormatter: function() {
+                            var log_10;
+                            console.log(this.infinity);
+                            if (this.infinity == true) {
+                                log_10 = 'plus infinity'
+                            } else {
+                                log_10 = this.y
+                            }
+                            return '<b>gene: ' + this.gene_id + '</b><br>' +
+                            '<b>log2(pval):</b>' + this.x + '<br><b>-log10(fc):</b> ' + log_10 +'<br>' +
+                                '<b>p value:</b>' + this.pval + '<br><b>fc:</b> ' + this.fc;
+                        },
                     }
                 }
             },
