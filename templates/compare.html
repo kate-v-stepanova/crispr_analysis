@@ -134,8 +134,8 @@
 {% if how_to_plot=='single_plot' %}
   <div id="cell_line_chart" data-plot-series="{{ plot_series }}"></div>
 {% elif how_to_plot=='multiple_plots' %}
-  {% for cell_line in y_axis_multiple %}
-    <div id="{{ cell_line }}_chart" data-plot-series="{{ [plot_series[cell_line]] }}"></div>
+  {% for cell_line_series in plot_series %}
+    <div id="{{ cell_line_series['name'] }}_chart" data-plot-series="{{ [cell_line_series] }}"></div>
   {% endfor %}
 {% endif %}
 

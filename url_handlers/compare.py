@@ -42,6 +42,7 @@ def compare_cell_lines():
         pval_less_or_greater = request.form.get('y_pval_less_or_greater')
 
         joint_df = None
+        full_df = None
         for cell_line in y_axis_multiple:
             df = pd.read_msgpack(rdb.get(cell_line))
             df = df[['gene_id', 'fc', 'pval', 'inc_ess']]
@@ -59,6 +60,17 @@ def compare_cell_lines():
                     df = df.loc[df['fc'] >= fc_min]
                     df = df.loc[df['fc'] <= fc_max]
                     df = df.loc[df['pval'] >= pval] if pval_less_or_greater == 'greater' else df.loc[df['pval'] <= pval]
+
+
+            if show_data_table:
+                # to fill the data table correctly
+                to_merge = df.copy() if cell_line != 'WT' else df[['gene_id', 'fc', 'pval']]
+                to_merge = to_merge.round(decimals=3)
+                columns = ['gene_id', '{}_fc'.format(cell_line), '{}_pval'.format(cell_line)]
+                if cell_line != 'WT':
+                    columns.append('{}_inc_ess'.format(cell_line))
+                to_merge.columns = columns
+                full_df = to_merge if full_df is None else pd.merge(full_df, to_merge, how='outer', on='gene_id')
 
             df = df.round(decimals=3)
 
