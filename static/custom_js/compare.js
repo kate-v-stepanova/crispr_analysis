@@ -131,4 +131,17 @@ $(document).ready(function() {
 //            $('#y_axis_filter').find('h4').last().text(cell_line + '.P value');
         }
     });
+
+    // export data table
+    var data_table = $('#data_table');
+    if (data_table.length != 0) {
+        var table_data = $(data_table).attr('table-csv-data');
+        $(data_table).removeAttr('table-csv-data');
+        $('#export_button').on('click', function() {
+            var cell_lines = $('#multiple_cell_lines').val() + ',' + $('#first_cell_line').val();
+            cell_lines = cell_lines.replace(/\,/g, '_');
+            var blob = new Blob([table_data], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, cell_lines + "_comparison.csv");
+        });
+    }
 });

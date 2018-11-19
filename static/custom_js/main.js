@@ -164,7 +164,7 @@ $(document).ready(function() {
         $(data_table).removeAttr('table-csv-data');
         $('#export_button').on('click', function() {
             var blob = new Blob([table_data], {type: "text/plain;charset=utf-8"});
-            saveAs(blob, cell_lines.join('_') + "_comparison.txt");
+            saveAs(blob, cell_lines.join('_') + "_comparison.csv");
         });
     }
 });
