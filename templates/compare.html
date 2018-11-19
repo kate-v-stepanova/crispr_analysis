@@ -43,11 +43,12 @@
 
   {# filter data #}
   <div class="form-check mt-4">
-    <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters">
+    <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters"
+           {% if apply_filters %}checked{% endif %}>
     <label class="form-check-label" for="apply_filters">Apply filters</label>
   </div>
 
-  <div class="row ml-2 d-none" id="data_filters">
+  <div class="row ml-2 {% if not apply_filters %}d-none{% endif %}" id="data_filters">
   {# X AXIS #}
     {# FC #}
     <div class="list-group col-sm-6" id="wt_filter">

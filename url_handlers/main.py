@@ -90,9 +90,7 @@ def show_scatter_plot():
 
                 if i not in rows_to_drop:
                     for column in inc_ess_columns:
-                        # print('column, value, gene: ', column, row[column], row['gene_id'])
                         if row[column] == 'no' or row[column] == np.nan:
-                            # print('previous: ', row[column])
                             cell_line = column.split('_inc_ess')[0]
                             if cell_line not in null_rows:
                                 null_rows[cell_line] = []
@@ -111,9 +109,10 @@ def show_scatter_plot():
             # # will just show all points regardless
             # if increased_essentiality and cell_line in null_rows:
             #     df.loc[null_rows[cell_line], columns] = np.nan
-            
+
             series_length = len(df.dropna())
-            df = df.fillna('null')
+            # carefull with this one - am I not removing too much data?
+            df = df.dropna()
             df.columns = ['name', 'y', 'pval', 'inc_ess']
             plot_series.append({
                 'name': cell_line,

@@ -97,7 +97,8 @@ def compare_cell_lines():
             df.columns = ['gene_id', 'y', 'y_pval', 'inc_ess']
             df = pd.merge(df, x_axis_df, how='inner', on='gene_id')
             series_length = len(df.dropna())
-            df = df.fillna('null')
+            # df = df.fillna('null')
+            df = df.dropna()
             plot_series.append({
                 'name': cell_line,
                 'data': list(df.T.to_dict().values()),
@@ -124,4 +125,4 @@ def compare_cell_lines():
 
 
         return render_template('compare.html', cell_lines=cell_lines, x_axis=x_axis, y_axis_multiple=y_axis_multiple,
-                               plot_series=plot_series, how_to_plot=how_to_plot, data_table=data_table)
+                               plot_series=plot_series, how_to_plot=how_to_plot, data_table=data_table, apply_filters=apply_filters)

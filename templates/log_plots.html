@@ -2,6 +2,8 @@
 {% block body %}
 <script src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
 <script src="{{ url_for('static', filename='custom_js/log_plots.js') }}"></script>
+<script src="{{ url_for('static', filename='js/exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js/offline-exporting.js') }}"></script>
 <form action="" method="POST">
   <label for="cell_line_select">Select cell line:</label>
   <select name="cell_line" class="custom-select" id="cell_line_select">
@@ -14,12 +16,11 @@
 
 
   <div class="row ml-0 mt-4" id="data_filters">
-  {# WILD TYPE FILTER #}
-    {# FC #}
+  {# THRESHOLDS #}
     <div class="list-group col-sm-6" id="wt_filter">
       {# <h2>WT Filter</h2> #}
       <div class="list-group-item">
-        <h4 class="list-item-heading">Border lines:</h4>
+        <h4 class="list-item-heading">Thresholds:</h4>
         <div class="list-group-item-text">
           <div class="row">
             <div class="col-sm-4">

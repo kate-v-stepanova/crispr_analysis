@@ -7,11 +7,10 @@ $(document).ready(function() {
 
     // initializing constants and removing attributes from html elements
     var PLOT_SERIES = $('#heatmap_chart').attr('data-plot-series').replace(/'/g, '"'); //");
-    console.log(PLOT_SERIES);
     if (PLOT_SERIES.length != 0) {
         PLOT_SERIES = JSON.parse(PLOT_SERIES);
     }
-    console.log(PLOT_SERIES);
+
     var GENES = $('#heatmap_chart').attr('data-genes').replace(/'/g, '"'); //");
     if (GENES.length != 0) {
         GENES = JSON.parse(GENES);
@@ -27,30 +26,29 @@ $(document).ready(function() {
     $('#heatmap_chart').removeAttr('data-cell-lines');
 
     if (PLOT_SERIES.length != 0) {
-        console.log('we are here');
         var chart_height = GENES.length * 25;
         Highcharts.chart('heatmap_chart', {
             chart: {
                 type: 'heatmap',
                 marginTop: 40,
                 marginBottom: 80,
-//                plotBorderWidth: 1,
                 height: chart_height,
 
             },
             title: {
-                text: 'Fold change values for selected genes vs cell lines'
+                text: 'Fold change values for selected genes vs cell lines',
+                y: 3
             },
 
             xAxis: {
                 categories: CELL_LINES,
+                opposite: true,
             },
 
             yAxis: {
                 categories: GENES,
                 title: null
             },
-
 
             colorAxis: {
                 stops: [

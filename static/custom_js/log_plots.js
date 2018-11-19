@@ -92,7 +92,6 @@ $(document).ready(function() {
                         headerFormat: '<b>cell line: ' + cell_line +'</b><br>',
                         pointFormatter: function() {
                             var log_10;
-                            console.log(this.infinity);
                             if (this.infinity == true) {
                                 log_10 = 'plus infinity'
                             } else {
