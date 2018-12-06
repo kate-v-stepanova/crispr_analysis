@@ -107,6 +107,7 @@ $(document).ready(function() {
             }
         });
     }
+
     $(document).on('change', '#apply_filters', function() {
         if(this.checked) {
           $('#data_filters').removeClass('d-none');

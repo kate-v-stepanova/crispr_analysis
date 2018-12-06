@@ -1,6 +1,6 @@
 import math
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, jsonify
 import pandas as pd
 import numpy as np
 
@@ -39,7 +39,11 @@ def show_scatter_plot():
         wt_df = None
         full_df = None
         for cell_line in selected_cell_lines:
-            df = pd.read_msgpack(rdb.get(cell_line))
+            print(cell_line)
+            data = rdb.get(cell_line)
+            if not data:
+                continue
+            df = pd.read_msgpack(data)
             df = df[['gene_id', 'fc', 'pval', 'inc_ess']]
             df.fc.astype(float)
             df.pval.astype(float)
@@ -111,14 +115,17 @@ def show_scatter_plot():
             #     df.loc[null_rows[cell_line], columns] = np.nan
 
             series_length = len(df.dropna())
-            # carefull with this one - am I not removing too much data?
-            df = df.dropna()
+            df = df.fillna("null") # do not dropna!!! It aligns all genes to the left
+            # a nice bug in JSON.parse:
+            # if the first element of a dictionary contains string "null" it will be parsed as a string "null" but not as a null object.
+            # then highcharts will throw error 14. instead of converting it. they bother to detect the error, but not to convert - waste of my time!!!
+            # to fix that, I did a very bad thing - removed "&&a.error(14,!0)" from the line 298 in highcharts.js (it doesn't check for error anymore)
             df.columns = ['name', 'y', 'pval', 'inc_ess']
             plot_series.append({
                 'name': cell_line,
                 'turboThreshold': len(df),
+                'series_length': series_length,
                 'data': list(df.T.to_dict().values()),
-                'series_length': series_length
             })
 
         data_table = None
@@ -134,65 +141,76 @@ def show_scatter_plot():
 
         # data for normalized counts
         counts_series = {}
-        for gene in genes:
-            gene_df = pd.read_msgpack(rdb.get('{}_counts'.format(gene)))
-            series_before = []
-            series_after = []
-            outliers = []
-            for i in range(len(selected_cell_lines)):
-                cell_line = selected_cell_lines[i]
-                key = 'RPE_{}'.format(cell_line)
-                df = gene_df.loc[gene_df['cell_line'] == key]
-
-                # keep only the ones that are within +3 to -3 standard deviations
-                without_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) <= (3 * df.norm_counts.std())]
-                only_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) > (3 * df.norm_counts.std())]
-                before = without_outliers.loc[without_outliers['treatment'] == 0]
-                after = without_outliers.loc[without_outliers['treatment'] == 1]
-
-                # calculate boxplot data
-                q1, median, q3 = before.norm_counts.quantile([0.25, 0.5, 0.75]).round(decimals=3).tolist()
-                series_before.append([
-                    before['norm_counts'].min(),
-                    q1,
-                    median,
-                    q3,
-                    before['norm_counts'].max()])
-                q1, median, q3 = after.norm_counts.quantile([0.25, 0.5, 0.75]).tolist()
-                series_after.append([
-                        after['norm_counts'].min(),
-                        q1,
-                        median,
-                        q3,
-                        after['norm_counts'].max()])
-                for index, row in only_outliers.iterrows():
-                    x = i
-                    y = round(row['norm_counts'], 3)
-                    treatment = 'Before Treatment' if int(row['treatment']) == 0 else 'After Treatment'
-                    outliers.append({
-                        'x': x,
-                        'y': y,
-                        'treatment': treatment,
-                        'cell_line': cell_line,
-                        'color': 'black' if treatment == 'After Treatment' else '#7cb5ec'
-                    })
-            counts_series[gene] = [{
-                    'name': 'Before Treatment',
-                    'data': series_before,
-                    'color': '#7cb5ec',
-                }, {
-                    'name': 'After Treatment',
-                    'data': series_after,
-                    'color': 'black',
-                }, {'name': 'Outliers',
-                    'type': 'scatter',
-                    'data': outliers,
-                    'color': 'black',
-                    'tooltip': {
-                        'pointFormat': '<br>cell line: {point.cell_line}<br>norm. counts: {point.y}<br>treatment: {point.treatment}',
-                    }
-                }
-            ]
         return render_template('main.html', cell_lines=cell_lines, genes=genes, plot_series=plot_series,
                                selected_cell_lines=selected_cell_lines, data_table=data_table, counts_series=counts_series,
                                increased_essentiality=increased_essentiality, apply_filters=apply_filters)
+
+# js post request - called on selected an entity from a list
+@main_page.route('/get_norm_counts/<gene>/<cell_lines>', methods=['POST'])
+def get_norm_counts(gene, cell_lines):
+    # this import has to be here!!
+    from crispr_analysis import get_db
+    rdb = get_db()
+    cell_lines = cell_lines.split(',')
+    print(type(cell_lines))
+    gene_df = pd.read_msgpack(rdb.get('{}_counts'.format(gene)))
+    series_before = []
+    series_after = []
+    outliers = []
+    for i in range(len(cell_lines)):
+        cell_line = cell_lines[i]
+        key = 'RPE_{}'.format(cell_line)
+        df = gene_df.loc[gene_df['cell_line'] == key]
+        if df.empty:
+            return "no normalized counts for cell_line: {}".format(cell_line)
+
+        # keep only the ones that are within +3 to -3 standard deviations
+        without_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) <= (3 * df.norm_counts.std())]
+        only_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) > (3 * df.norm_counts.std())]
+        before = without_outliers.loc[without_outliers['treatment'] == 0]
+        after = without_outliers.loc[without_outliers['treatment'] == 1]
+
+        # calculate boxplot data
+        q1, median, q3 = before.norm_counts.quantile([0.25, 0.5, 0.75]).round(decimals=3).tolist()
+        series_before.append([
+            before['norm_counts'].min(),
+            q1,
+            median,
+            q3,
+            before['norm_counts'].max()])
+        q1, median, q3 = after.norm_counts.quantile([0.25, 0.5, 0.75]).tolist()
+        series_after.append([
+                after['norm_counts'].min(),
+                q1,
+                median,
+                q3,
+                after['norm_counts'].max()])
+        for index, row in only_outliers.iterrows():
+            x = i
+            y = round(row['norm_counts'], 3)
+            treatment = 'Before Treatment' if int(row['treatment']) == 0 else 'After Treatment'
+            outliers.append({
+                'x': x,
+                'y': y,
+                'treatment': treatment,
+                'cell_line': cell_line,
+                'color': 'black' if treatment == 'After Treatment' else '#7cb5ec'
+            })
+    counts_series = [{
+            'name': 'Before Treatment',
+            'data': series_before,
+            'color': '#7cb5ec',
+        }, {
+            'name': 'After Treatment',
+            'data': series_after,
+            'color': 'black',
+        }, {'name': 'Outliers',
+            'type': 'scatter',
+            'data': outliers,
+            'color': 'black',
+            'tooltip': {
+                'pointFormat': '<br>cell line: {point.cell_line}<br>norm. counts: {point.y}<br>treatment: {point.treatment}',
+            }
+        }
+    ]
+    return jsonify(counts_series)

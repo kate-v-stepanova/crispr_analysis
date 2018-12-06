@@ -52,16 +52,41 @@ def counts(input_file):
         gene = genes[i]
         gene_df = full_df.loc[full_df['gene_id'] == gene]
         gene_df = gene_df[['gene_id', 'cell_line', 'treatment',  'norm_counts']]
-        if (i%100 == 0 or i + 100 >= len(genes)):
+        if i%100 == 0 or i + 100 >= len(genes):
             print('writing {} to {} out of {} genes'.format(i, min(i+100, len(genes)), len(genes)))
         key = '{}_counts'.format(gene)
         rdb.set(key, gene_df.to_msgpack())
-
 
 @cli.command()
 def flush():
     rdb = redis.StrictRedis()
     rdb.flushall()
+
+@cli.command()
+@click.argument('input_file')
+def with_drugs(input_file):
+    rdb = redis.StrictRedis()
+    df = pd.read_csv(input_file, sep='\t')
+    cell_lines = df['cell_line'].unique()
+    treatments = df['treatment'].unique()
+    timepoints = df['time_point'].unique()
+    cell_line_keys = []
+    for cell_line in cell_lines:
+        cell_line_df = df.loc[df['cell_line'] == cell_line]
+        for treatment in treatments:
+            treatment_df = cell_line_df.loc[cell_line_df['treatment'] == treatment]
+            for timepoint in timepoints:
+                timepoint_df = treatment_df.loc[treatment_df['time_point'] == timepoint]
+                key = "{}_{}_{}".format(cell_line, treatment, timepoint)
+                cell_line_keys.append(key)
+                timepoint_df['inc_ess'] = pd.Series('n/a', index=timepoint_df.index)
+                timepoint_df = timepoint_df[['gene_id', 'fc', 'pval', 'treatment', 'inc_ess']]
+                rdb.set(key, timepoint_df.to_msgpack(encoding='utf-8'))
+
+    rdb.sadd('treatments', *set(treatments))
+    rdb.sadd('timepoints', *set(timepoints))
+    rdb.sadd('cell_lines', *set(cell_line_keys))
+
 
 if __name__ == '__main__':
     cli()

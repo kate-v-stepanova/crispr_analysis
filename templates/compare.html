@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/choices.min.css') }}">
-<script src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
-<script src="{{ url_for('static', filename='js/choices.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/exporting.js') }}"></script>
-<script src="{{ url_for('static', filename='js/offline-exporting.js') }}"></script>
-<script src="{{ url_for('static', filename='custom_js/compare.js') }}"></script>
-<script src="{{ url_for('static', filename='js/FileSaver.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css_libraries/choices.min.css') }}">
+<script src="{{ url_for('static', filename='js_libraries/highcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/choices.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/offline-exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js/compare.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/FileSaver.js') }}"></script>
 <form action="" method="POST">
   <label for="first_cell_line">Select x axis:</label>
   <select name="x_axis" class="custom-select" id="first_cell_line">

@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
-<script src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
-<script src="{{ url_for('static', filename='custom_js/log_plots.js') }}"></script>
-<script src="{{ url_for('static', filename='js/exporting.js') }}"></script>
-<script src="{{ url_for('static', filename='js/offline-exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/highcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/log_plots.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/offline-exporting.js') }}"></script>
 <form action="" method="POST">
   <label for="cell_line_select">Select cell line:</label>
   <select name="cell_line" class="custom-select" id="cell_line_select">

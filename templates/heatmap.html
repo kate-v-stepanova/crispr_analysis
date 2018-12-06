@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
 {# imports #}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/choices.min.css') }}">
-<script src="{{ url_for('static', filename='js/choices.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
-<script src="{{ url_for('static', filename='js/highcharts_heatmap.js') }}"></script>
-<script src="{{ url_for('static', filename='custom_js/heatmap.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css_libraries/choices.min.css') }}">
+<script src="{{ url_for('static', filename='js_libraries/choices.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/highcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/highcharts_heatmap.js') }}"></script>
+<script src="{{ url_for('static', filename='js/heatmap.js') }}"></script>
 {# end of imports #}
 <div>
   <form action="" method="POST">

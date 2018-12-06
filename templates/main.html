@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/choices.min.css') }}">
-<script src="{{ url_for('static', filename='js/choices.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
-<script src="{{ url_for('static', filename='custom_js/main.js') }}"></script>
-<script src="{{ url_for('static', filename='js/highcharts-more.js') }}"></script>
-<script src="{{ url_for('static', filename='js/exporting.js') }}"></script>
-<script src="{{ url_for('static', filename='js/offline-exporting.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css_libraries/choices.min.css') }}">
+<script src="{{ url_for('static', filename='js_libraries/choices.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/highcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/highcharts-more.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/offline-exporting.js') }}"></script>
 {# export data table #}
-<script src="{{ url_for('static', filename='js/FileSaver.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/FileSaver.js') }}"></script>
 
 <div id="accordion">
   <div class="card">
@@ -152,9 +152,7 @@
 
         <div class="row">
           <div id="cell_line_chart" data-plot-series="{{ plot_series }}" data-genes="{{ genes }}" class="col-sm-12"></div>
-          {% if counts_series %}
-          <div id="boxplot_data" data-plot-series="{{ counts_series }}" class="col-sm-0"></div>
-          {% endif %}
+          <div id="boxplot_data" class="col-sm-0"></div>
         </div>
         {% if data_table %}
         <div>
