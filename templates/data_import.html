@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+<form action="" method="POST" enctype="multipart/form-data">
+  <label for="data_type">What do you want to import?</label>
+  <select name="data_type" class="custom-select mb-2" id="data_type">
+    <option value="fold_changes" {% if selected_data_type=="fold_changes" %}selected{% endif %}>Fold change and p values</option>
+    <option value="norm_counts" {% if selected_data_type=="norm_counts" %}selected{% endif %}>Normalized counts</option>
+    <option value="flush_db" {% if selected_data_type=="flush_db" %} selected {% endif %}>Flush database - WARNING: This will delete ALL data!!</option>
+  </select>
+
+  <label for="with_drugs">With drugs or without drugs?</label>
+  <select name="with_drugs" class="custom-select mb-2" id="with_drugs">
+    <option name="with_drugs" {% if with_drugs=="with_drugs" %} selected {% endif %} value="with_drugs">With drugs</option>
+    <option name="without_drugs" {% if with_drugs=="without_drugs" %} selected {% endif %} value="without_drugs">Without drugs</option>
+  </select>
+
+  <div class="custom-file">
+    <input type="file" class="custom-file-input" id="input_file" name="input_file">
+    <label class="custom-file-label" for="input_file">Select file</label>
+  </div>
+
+  <button class="btn btn-outline-info mt-2" type="submit">Update database</button>
+</form>
+{% endblock %}
