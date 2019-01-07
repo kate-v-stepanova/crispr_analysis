@@ -92,10 +92,24 @@ def compare_cell_lines():
 
         plot_series = []
         for cell_line in y_axis_multiple:
+
             df = joint_df[['gene_id', '{}_fc'.format(cell_line),
                            '{}_pval'.format(cell_line), '{}_inc_ess'.format(cell_line)]]
+
+            # apply_filters
+            if apply_filters:
+                if cell_line == 'WT':
+                    df = df.loc[df['fc'] >= wt_fc_min]
+                    df = df.loc[df['fc'] <= wt_fc_max]
+                    df = df.loc[df['pval'] >= wt_pval] if wt_pval_less_or_greater == 'greater' else df.loc[
+                        df['pval'] <= wt_pval]
+                else:
+                    df = df.loc[df['fc'] >= fc_min]
+                    df = df.loc[df['fc'] <= fc_max]
+                    df = df.loc[df['pval'] >= pval] if pval_less_or_greater == 'greater' else df.loc[df['pval'] <= pval]
+
             df.columns = ['gene_id', 'y', 'y_pval', 'inc_ess']
-            df = pd.merge(df, x_axis_df, how='inner', on='gene_id')
+            df = pd.merge(df, x_axis_df, how='outer', on='gene_id')
             series_length = len(df.dropna())
             # df = df.fillna('null')
             df = df.dropna()

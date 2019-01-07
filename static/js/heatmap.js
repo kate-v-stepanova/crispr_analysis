@@ -52,9 +52,9 @@ $(document).ready(function() {
 
             colorAxis: {
                 stops: [
-                    [0.2, '#4575b5'],
-                    [0.8, '#ffffff'],
-                    [1.2, '#d73028'],
+                    [0.3, '#8EBDEA'],
+                    [0.5, '#ffffff'],
+                    [0.8, '#ec9b97'],
                 ],
                 min: 0.2,
                 max: 1.2,
@@ -83,6 +83,7 @@ $(document).ready(function() {
                 data: PLOT_SERIES,
                 pointStart: 0,
                 pointInterval: 1,
+                turboThreshold: 7000,
                 dataLabels: {
                     enabled: true,
                     color: '#000000'

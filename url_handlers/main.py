@@ -152,7 +152,6 @@ def get_norm_counts(gene, cell_lines):
     from crispr_analysis import get_db
     rdb = get_db()
     cell_lines = cell_lines.split(',')
-    print(type(cell_lines))
     gene_df = pd.read_msgpack(rdb.get('{}_counts'.format(gene)))
     series_before = []
     series_after = []
@@ -162,7 +161,10 @@ def get_norm_counts(gene, cell_lines):
         key = 'RPE_{}'.format(cell_line)
         df = gene_df.loc[gene_df['cell_line'] == key]
         if df.empty:
-            return "no normalized counts for cell_line: {}".format(cell_line)
+            key = cell_line
+            df = gene_df.loc[gene_df['cell_line'] == key]
+            if df.empty:
+                continue
 
         # keep only the ones that are within +3 to -3 standard deviations
         without_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) <= (3 * df.norm_counts.std())]
@@ -173,18 +175,18 @@ def get_norm_counts(gene, cell_lines):
         # calculate boxplot data
         q1, median, q3 = before.norm_counts.quantile([0.25, 0.5, 0.75]).round(decimals=3).tolist()
         series_before.append([
-            before['norm_counts'].min(),
+            before['norm_counts'].min().round(decimals=3),
             q1,
             median,
             q3,
-            before['norm_counts'].max()])
-        q1, median, q3 = after.norm_counts.quantile([0.25, 0.5, 0.75]).tolist()
+            before['norm_counts'].max().round(decimals=3)])
+        q1, median, q3 = after.norm_counts.quantile([0.25, 0.5, 0.75]).round(decimals=3).tolist()
         series_after.append([
-                after['norm_counts'].min(),
+                after['norm_counts'].min().round(decimals=3),
                 q1,
                 median,
                 q3,
-                after['norm_counts'].max()])
+                after['norm_counts'].max().round(decimals=3)])
         for index, row in only_outliers.iterrows():
             x = i
             y = round(row['norm_counts'], 3)

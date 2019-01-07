@@ -57,6 +57,126 @@ def counts(input_file):
         key = '{}_counts'.format(gene)
         rdb.set(key, gene_df.to_msgpack())
 
+
+@cli.command()
+@click.argument('input_file')
+# @click.option('--drugs/--no-drugs', default=False)
+@click.argument('cell_line', required=False)
+def counts_with_drugs(input_file, cell_line):
+    print(cell_line)
+    rdb = redis.StrictRedis()
+    import_df = pd.read_csv(input_file, sep='\t')
+    genes = import_df['gene_id'].unique()
+    for i in range(len(genes)):
+        gene = genes[i]
+        existing_df = pd.read_msgpack(rdb.get('{}_counts'.format(gene)))
+        # columns_of_df = ['gene_id', 'cell_line', 'treatment', 'norm_counts']
+        gene_df = import_df.loc[import_df['gene_id'] == gene]
+        # ['sample_id', 'treatment', 'replicate', 'guide_id', 'counts', 'gene_id', 'seq', 'library', 'norm_counts']
+        samples = gene_df['sample_id'].unique()
+        week0_df = pd.DataFrame(columns=['gene_id', 'cell_line', 'treatment', 'norm_counts'])
+        week1_df = pd.DataFrame(columns=['gene_id', 'cell_line', 'treatment', 'norm_counts'])
+        for sample_id in samples:
+            gene_df = import_df.loc[(import_df['sample_id'] == sample_id) & (import_df['gene_id'] == gene)]
+            if sample_id == 'day0':
+                gene_df = gene_df[['gene_id', 'treatment', 'norm_counts']]
+                gene_df['treatment'] = 0
+                # mock drug
+                gene_df['cell_line'] = '{}_mock_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                # cisplatin drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_cis_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                # topotecan drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_topo_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                # irradiation drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_irr_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                # fu drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_fu_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+            elif sample_id == 'day7':
+                gene_df = gene_df[['gene_id', 'treatment', 'norm_counts']]
+                gene_df['treatment'] = 1
+                # mock drug
+                gene_df['cell_line'] = '{}_mock_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                # cisplatin drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_cis_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                # topotecan drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_topo_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                # irradiation drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_irr_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                # fu drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_fu_week0'.format(cell_line)
+                week0_df.append(gene_df, ignore_index=True)
+                ## the same for week1
+                gene_df = gene_df.copy()
+                gene_df['treatment'] = 0
+                # mock drug
+                gene_df['cell_line'] = '{}_mock_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+                # cisplatin drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_cis_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+                # topotecan drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_topo_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+                # irradiation drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_irr_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+                # fu drug
+                gene_df = gene_df.copy()
+                gene_df['cell_line'] = '{}_fu_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+            elif sample_id == 'day21mock':
+                gene_df = gene_df.copy()
+                gene_df['treatment'] = 1
+                gene_df['cell_line'] = '{}_mock_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+            elif sample_id == 'day21cis':
+                gene_df = gene_df.copy()
+                gene_df['treatment'] = 1
+                gene_df['cell_line'] = '{}_cis_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+            elif sample_id == 'day21irr':
+                gene_df = gene_df.copy()
+                gene_df['treatment'] = 1
+                gene_df['cell_line'] = '{}_irr_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+            elif sample_id == 'day21topo':
+                gene_df = gene_df.copy()
+                gene_df['treatment'] = 1
+                gene_df['cell_line'] = '{}_topo_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+            elif sample_id == 'day21fu':
+                gene_df = gene_df.copy()
+                gene_df['treatment'] = 1
+                gene_df['cell_line'] = '{}_fu_week1'.format(cell_line)
+                week1_df.append(gene_df, ignore_index=True)
+
+        existing_df.append(week0_df, ignore_index=True)
+        existing_df.append(week1_df, ignore_index=True)
+        if i%100 == 0 or i + 100 >= len(genes):
+            print('writing {} to {} out of {} genes'.format(i, min(i+100, len(genes)), len(genes)))
+        key = '{}_counts'.format(gene)
+        rdb.set(key, existing_df.to_msgpack())
+
 @cli.command()
 def flush():
     rdb = redis.StrictRedis()
