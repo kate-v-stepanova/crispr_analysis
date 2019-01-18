@@ -138,4 +138,9 @@ def get_log_plots():
         #     ]
         return render_template('log_plots.html', cell_lines=cell_lines, selected_cell_line=cell_line,
                                plot_series=plot_series, genes=genes, right=right_line, left=left_line, bottom=bottom_line,
+                               selected_thresholds = {
+                                   'left': left,
+                                   'right': right,
+                                   'bottom': bottom,
+                               }
                                )
