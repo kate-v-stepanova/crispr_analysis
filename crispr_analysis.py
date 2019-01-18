@@ -7,6 +7,7 @@ from url_handlers.log_plots import log_plots_page
 from url_handlers.compare import compare_page
 from url_handlers.heatmap import heatmap_page
 from url_handlers.data_import import import_page
+from url_handlers.clustering import cluster_page
 
 app = Flask(__name__)
 
@@ -15,6 +16,7 @@ app.register_blueprint(log_plots_page)
 app.register_blueprint(compare_page)
 app.register_blueprint(heatmap_page)
 app.register_blueprint(import_page)
+app.register_blueprint(cluster_page)
 
 # Database stuff
 def connect_db():
