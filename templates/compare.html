@@ -58,12 +58,14 @@
         <div class="list-group-item-text">
           <div class="row">
             <div class="col-sm-4">
-              <label class="mt-2" for="wt_fc_max">Max fc value:</label><br>
-              <label class="mt-2" for="wt_fc_min">Min fc value:</label>
+              <label class="mt-2" for="x_fc_max">Max fc value:</label><br>
+              <label class="mt-2" for="x_fc_min">Min fc value:</label>
             </div>
             <div class="col-sm-8">
-              <input class="form-control input-sm" type="number" name="wt_fc_max" min="0.0" step="0.01" value="1.5" id="wt_fc_max">
-              <input class="form-control input-sm mt-1" type="number" name="wt_fc_min" min="0.0" step="0.01" value="0.67" id="wt_fc_min">
+              <input class="form-control input-sm" type="number" name="x_fc_max" min="0.0" step="0.01" id="x_fc_max"
+                 value="{% if selected_filter %}{{ selected_filter.get('x_fc_max') }}{% else %}1.0{% endif %}">
+              <input class="form-control input-sm mt-1" type="number" name="x_fc_min" min="0.0" step="0.01" id="x_fc_min"
+                 value="{% if selected_filter %}{{ selected_filter.get('x_fc_min') }}{% else %}0.67{% endif %}">
             </div>
           </div>
         </div>
@@ -74,16 +76,23 @@
         <div class="list-group-item-text row">
           <div class="col-sm-4">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" id="wt_pval_less" name="wt_pval_less_or_greater" value="less" checked>
-              <label class="custom-control-label" for="wt_pval_less">Less than</label>
+              <input type="radio" class="custom-control-input" id="x_pval_less" name="x_pval_less_or_greater" value="less"
+                     {% if selected_filter %}
+                      {% if selected_filter.get('x_pval_less_or_greater') == 'less' %}checked{% endif %}
+                     {% else %}checked{% endif %}>
+              <label class="custom-control-label" for="x_pval_less">Less than</label>
             </div>
             <div class="custom-control custom-radio">
-                <input type="radio" class="custom-control-input" id="wt_pval_greater" name="wt_pval_less_or_greater" value="greater">
-                <label class="custom-control-label" for="wt_pval_greater">Greater than</label>
+              <input type="radio" class="custom-control-input" id="x_pval_greater" name="x_pval_less_or_greater" value="greater"
+                     {% if selected_filter %}
+                      {% if selected_filter.get('x_pval_less_or_greater') == 'greater' %}checked{% endif %}
+                     {% endif %}>
+              <label class="custom-control-label" for="x_pval_greater">Greater than</label>
             </div>
           </div>
           <div class="col-sm-8 mt-2">
-            <input class="form-control" type="number" name="wt_pval_max" min="0.0" step="0.01" value="0.15" id="wt_pval_max">
+              <input class="form-control" type="number" name="x_pval" min="0.0" step="0.01" id="x_pval"
+                   value="{% if selected_filter %}{{ selected_filter.get('x_pval') }}{% else %}0.15{% endif %}">
           </div>
         </div>
       </div>
@@ -101,8 +110,10 @@
               <label class="mt-2" for="y_fc_min">Min fc value:</label>
             </div>
             <div class="col-sm-8">
-              <input class="form-control input-sm" type="number" name="y_fc_max" min="0.0" step="0.01" value="0.67" id="y_fc_max">
-              <input class="form-control input-sm mt-1" type="number" name="y_fc_min" min="0.0" step="0.01" value="0" id="y_fc_min">
+              <input class="form-control input-sm" type="number" name="y_fc_max" min="0.0" step="0.01" id="y_fc_max"
+                 value="{% if selected_filter %}{{ selected_filter.get('y_fc_max') }}{% else %}0.67{% endif %}">
+              <input class="form-control input-sm mt-1" type="number" name="y_fc_min" min="0.0" step="0.01" id="y_fc_min"
+                 value="{% if selected_filter %}{{ selected_filter.get('y_fc_min') }}{% else %}0.0{% endif %}">
             </div>
           </div>
         </div>
@@ -111,18 +122,26 @@
       <div class="list-group-item">
       <h4 class="list-item-heading">P value</h4>
         <div class="list-group-item-text row">
+
           <div class="col-sm-4">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" id="y_pval_less" name="y_pval_less_or_greater" value="less" checked>
+              <input type="radio" class="custom-control-input" id="y_pval_less" name="y_pval_less_or_greater" value="less"
+                     {% if selected_filter %}
+                      {% if selected_filter.get('y_pval_less_or_greater') == 'less' %}checked{% endif %}
+                      {% else %}checked{% endif %}>
               <label class="custom-control-label" for="y_pval_less">Less than</label>
             </div>
             <div class="custom-control custom-radio">
-                <input type="radio" class="custom-control-input" id="y_pval_greater" name="y_pval_less_or_greater" value="greater">
-                <label class="custom-control-label" for="y_pval_greater">Greater than</label>
+              <input type="radio" class="custom-control-input" id="y_pval_greater" name="y_pval_less_or_greater" value="greater"
+                     {% if selected_filter %}
+                      {% if selected_filter.get('y_pval_less_or_greater') == 'greater' %}checked{% endif %}
+                     {% endif %}>
+              <label class="custom-control-label" for="y_pval_greater">Greater than</label>
             </div>
           </div>
           <div class="col-sm-8 mt-2">
-            <input class="form-control" type="number" name="y_pval_max" min="0.0" step="0.01" value="0.15" id="y_pval_max">
+              <input class="form-control" type="number" name="y_pval" min="0.0" step="0.01" id="y_pval"
+                   value="{% if selected_filter %}{{ selected_filter.get('y_pval') }}{% else %}0.15{% endif %}">
           </div>
         </div>
       </div>

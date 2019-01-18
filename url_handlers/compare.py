@@ -27,15 +27,14 @@ def compare_cell_lines():
 
         # filters
         apply_filters = request.form.get('apply_filters') is not None
-        wt_fc_max = float(request.form.get('wt_fc_max'))
-        wt_fc_min = float(request.form.get('wt_fc_min'))
-        wt_pval = float(request.form.get('wt_pval_max'))
-        wt_pval_less_or_greater = request.form.get('wt_pval_less_or_greater')
-        fc_max = float(request.form.get('y_fc_max'))
-        fc_min = float(request.form.get('y_fc_min'))
-        pval = float(request.form.get('y_pval_max'))
-        pval_less_or_greater = request.form.get('y_pval_less_or_greater')
-
+        x_fc_max = float(request.form.get('x_fc_max'))
+        x_fc_min = float(request.form.get('x_fc_min'))
+        x_pval = float(request.form.get('x_pval'))
+        x_pval_less_or_greater = request.form.get('x_pval_less_or_greater')
+        y_fc_max = float(request.form.get('y_fc_max'))
+        y_fc_min = float(request.form.get('y_fc_min'))
+        y_pval = float(request.form.get('y_pval'))
+        y_pval_less_or_greater = request.form.get('y_pval_less_or_greater')
 
         x_axis_df = pd.read_msgpack(rdb.get(x_axis))
         x_axis_df = x_axis_df[['gene_id', 'fc', 'pval']]
@@ -43,16 +42,10 @@ def compare_cell_lines():
         x_axis_df = x_axis_df.round(decimals=3)
 
         if apply_filters:
-            if x_axis == 'WT':
-                x_axis_df = x_axis_df.loc[x_axis_df['x'] <= wt_fc_max]
-                x_axis_df = x_axis_df.loc[x_axis_df['x'] >= wt_fc_min]
-                x_axis_df = x_axis_df.loc[x_axis_df['x_pval'] >= wt_pval] if wt_pval_less_or_greater == 'greater' else \
-                            x_axis_df.loc[x_axis_df['x_pval'] <= wt_pval]
-            else:
-                x_axis_df = x_axis_df.loc[x_axis_df['x'] <= fc_max]
-                x_axis_df = x_axis_df.loc[x_axis_df['x'] >= fc_min]
-                x_axis_df = x_axis_df.loc[x_axis_df['x_pval'] >= pval] if pval_less_or_greater == 'greater' else \
-                            x_axis_df.loc[x_axis_df['x_pval'] <= pval]
+            x_axis_df = x_axis_df.loc[x_axis_df['x'] <= x_fc_max]
+            x_axis_df = x_axis_df.loc[x_axis_df['x'] >= x_fc_min]
+            x_axis_df = x_axis_df.loc[x_axis_df['x_pval'] >= x_pval] if x_pval_less_or_greater == 'greater' else \
+                        x_axis_df.loc[x_axis_df['x_pval'] <= x_pval]
 
         joint_df = None
         full_df = None
@@ -75,14 +68,16 @@ def compare_cell_lines():
 
             # apply_filters
             if apply_filters:
-                if cell_line == 'WT':
-                    df = df.loc[df['fc'] >= wt_fc_min]
-                    df = df.loc[df['fc'] <= wt_fc_max]
-                    df = df.loc[df['pval'] >= wt_pval] if wt_pval_less_or_greater == 'greater' else df.loc[df['pval'] <= wt_pval]
-                else:
-                    df = df.loc[df['fc'] >= fc_min]
-                    df = df.loc[df['fc'] <= fc_max]
-                    df = df.loc[df['pval'] >= pval] if pval_less_or_greater == 'greater' else df.loc[df['pval'] <= pval]
+                # if 'WT' in cell_line:
+                #     df = df.loc[df['fc'] >= x_fc_min]
+                #     df = df.loc[df['fc'] <= x_fc_max]
+                #     df = df.loc[df['pval'] >= x_pval] if x_pval_less_or_greater == 'greater' \
+                #         else df.loc[df['pval'] <= x_pval]
+                # else:
+                    df = df.loc[df['fc'] >= y_fc_min]
+                    df = df.loc[df['fc'] <= y_fc_max]
+                    df = df.loc[df['pval'] >= y_pval] if y_pval_less_or_greater == 'greater' \
+                        else df.loc[df['pval'] <= y_pval]
 
             df = df.round(decimals=3)
 
@@ -98,15 +93,16 @@ def compare_cell_lines():
 
             # apply_filters
             if apply_filters:
-                if cell_line == 'WT':
-                    df = df.loc[df['fc'] >= wt_fc_min]
-                    df = df.loc[df['fc'] <= wt_fc_max]
-                    df = df.loc[df['pval'] >= wt_pval] if wt_pval_less_or_greater == 'greater' else df.loc[
-                        df['pval'] <= wt_pval]
-                else:
-                    df = df.loc[df['fc'] >= fc_min]
-                    df = df.loc[df['fc'] <= fc_max]
-                    df = df.loc[df['pval'] >= pval] if pval_less_or_greater == 'greater' else df.loc[df['pval'] <= pval]
+                # if 'WT' in cell_line:
+                #     df = df.loc[df['{}_fc'.format(cell_line)] >= x_fc_min]
+                #     df = df.loc[df['{}_fc'.format(cell_line)] <= x_fc_max]
+                #     df = df.loc[df['{}_pval'.format(cell_line)] >= x_pval] if x_pval_less_or_greater == 'greater' \
+                #         else df.loc[df['{}_pval'.format(cell_line)] <= x_pval]
+                # else:
+                    df = df.loc[df['{}_fc'.format(cell_line)] >= y_fc_min]
+                    df = df.loc[df['{}_fc'.format(cell_line)] <= y_fc_max]
+                    df = df.loc[df['{}_pval'.format(cell_line)] >= y_pval] if y_pval_less_or_greater == 'greater' \
+                        else df.loc[df['{}_pval'.format(cell_line)] <= y_pval]
 
             df.columns = ['gene_id', 'y', 'y_pval', 'inc_ess']
             df = pd.merge(df, x_axis_df, how='outer', on='gene_id')
@@ -125,7 +121,7 @@ def compare_cell_lines():
             genes = joint_df['gene_id'].tolist()
             data_table_df = full_df[full_df['gene_id'].isin(genes)]
             x_columns = ['gene_id', '{}_fc'.format(x_axis), '{}_pval'.format(x_axis)]
-            if x_axis != 'WT':
+            if 'WT' not in x_axis:
                 x_columns.append('{}_inc_ess'.format(x_axis))
             x_axis_df.columns = x_columns
             data_table_df = pd.merge(data_table_df, x_axis_df, how='inner', on='gene_id')
@@ -137,6 +133,11 @@ def compare_cell_lines():
                 'csv': data_table_df.to_csv(sep='\t', index=False)
             }
 
-
         return render_template('compare.html', cell_lines=cell_lines, x_axis=x_axis, y_axis_multiple=y_axis_multiple,
-                               plot_series=plot_series, how_to_plot=how_to_plot, data_table=data_table, apply_filters=apply_filters)
+                               plot_series=plot_series, how_to_plot=how_to_plot, data_table=data_table, apply_filters=apply_filters,
+                               selected_filters={
+                                    'x_fc_max': x_fc_max,
+                                    'x_fc_min': x_fc_min,
+                                    'x_pval': x_pval,
+                                    'x_pval_less_or_greater': x_pval_less_or_greater
+                               })
