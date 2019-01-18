@@ -30,10 +30,10 @@ def show_scatter_plot():
         wt_fc_min = float(request.form.get('wt_fc_min'))
         wt_pval = float(request.form.get('wt_pval_max'))
         wt_pval_less_or_greater = request.form.get('wt_pval_less_or_greater')
-        fc_max = float(request.form.get('y_fc_max'))
-        fc_min = float(request.form.get('y_fc_min'))
-        pval = float(request.form.get('y_pval_max'))
-        pval_less_or_greater = request.form.get('y_pval_less_or_greater')
+        other_fc_max = float(request.form.get('other_fc_max'))
+        other_fc_min = float(request.form.get('other_fc_min'))
+        other_pval = float(request.form.get('other_pval_max'))
+        other_pval_less_or_greater = request.form.get('other_pval_less_or_greater')
 
         joint_df = None
         wt_df = None
@@ -65,9 +65,10 @@ def show_scatter_plot():
                     df = df.loc[df['fc'] <= wt_fc_max]
                     df = df.loc[df['pval'] >= wt_pval] if wt_pval_less_or_greater == 'greater' else df.loc[df['pval'] <= wt_pval]
                 else:
-                    df = df.loc[df['fc'] >= fc_min]
-                    df = df.loc[df['fc'] <= fc_max]
-                    df = df.loc[df['pval'] >= pval] if pval_less_or_greater == 'greater' else df.loc[df['pval'] <= pval]
+                    df = df.loc[df['fc'] >= other_fc_min]
+                    df = df.loc[df['fc'] <= other_fc_max]
+                    df = df.loc[df['pval'] >= other_pval] if other_pval_less_or_greater == 'greater' \
+                        else df.loc[df['pval'] <= other_pval]
             df = df.round(decimals=3)
 
             df.columns = ['gene_id', '{}_fc'.format(cell_line), '{}_pval'.format(cell_line),
@@ -142,7 +143,17 @@ def show_scatter_plot():
         counts_series = {}
         return render_template('main.html', cell_lines=cell_lines, genes=genes, plot_series=plot_series,
                                selected_cell_lines=selected_cell_lines, data_table=data_table, counts_series=counts_series,
-                               increased_essentiality=increased_essentiality, apply_filters=apply_filters)
+                               increased_essentiality=increased_essentiality, apply_filters=apply_filters,
+                               selected_filters={
+                                    'wt_fc_max': wt_fc_max,
+                                    'wt_fc_min': wt_fc_min,
+                                    'wt_pval': wt_pval,
+                                    'wt_pval_less_or_greater': wt_pval_less_or_greater,
+                                    'fc_max': other_fc_max,
+                                    'fc_min': other_fc_min,
+                                    'pval': other_pval,
+                                    'pval_less_or_greater': other_pval_less_or_greater,
+                               })
 
 # js post request - called on selected an entity from a list
 @main_page.route('/get_norm_counts/<gene>/<cell_lines>', methods=['POST'])
