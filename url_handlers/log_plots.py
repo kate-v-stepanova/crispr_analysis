@@ -23,8 +23,8 @@ def get_log_plots():
         df = df[['gene_id', 'fc', 'pval']]
 
         #  dash lines
-        left = float(request.form.get('right'))
-        right = float(request.form.get('left'))
+        left = float(request.form.get('left'))
+        right = float(request.form.get('right'))
         bottom = float(request.form.get('bottom'))
 
         left_line = round(math.log2(left), 2)
@@ -58,7 +58,7 @@ def get_log_plots():
                 'name': cell_line,
                 'data': list(left_df.dropna().T.to_dict().values()),
                 'turboThreshold': len(left_df),
-                'color': 'red',
+                'color': 'blue',
                 'marker': {
                     'symbol': 'circle',
                     'radius': 5,
@@ -68,7 +68,7 @@ def get_log_plots():
                 'name': cell_line,
                 'data': list(right_df.dropna().T.to_dict().values()),
                 'turboThreshold': len(right_df),
-                'color': 'blue',
+                'color': 'red',
                 'marker': {
                     'symbol': 'circle',
                     'radius': 5,
