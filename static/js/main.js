@@ -103,6 +103,14 @@ $(document).ready(function() {
         $('#hide_counts').removeClass('d-none');
         $.post('/get_norm_counts/' + gene + "/" + cell_lines, function(data, status) {
             if (status == 'success' && data.length != 0) {
+                if (data['errors'].length != 0) {
+                    $('#error_messages').html("");
+                    for (i=0; i<data['errors'].length; i++) {
+                        $('#error_messages').append("<p>"+data['errors'][i] + "</p>")
+                    }
+
+                    $('#error_div').removeClass('d-none');
+                }
                 Highcharts.chart('boxplot_data', {
                     chart: {
                         type: 'boxplot'
@@ -137,7 +145,7 @@ $(document).ready(function() {
                             }
                         }
                     },
-                    series: data
+                    series: data['data'],
                 });
             } else {
                 $('#boxplot_data').html('No data found for the gene <b>' + gene + "</b>");
@@ -165,4 +173,9 @@ $(document).ready(function() {
             saveAs(blob, cell_lines.join('_') + "_comparison.csv");
         });
     }
+
+
+    $(document).on('click', 'span.close', function() {
+        $(this).closest('div.alert').addClass('d-none');
+    });
 });

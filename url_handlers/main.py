@@ -39,7 +39,6 @@ def show_scatter_plot():
         wt_df = None
         full_df = None
         for cell_line in selected_cell_lines:
-            print(cell_line)
             data = rdb.get(cell_line)
             if not data:
                 continue
@@ -152,19 +151,27 @@ def get_norm_counts(gene, cell_lines):
     from crispr_analysis import get_db
     rdb = get_db()
     cell_lines = cell_lines.split(',')
-    gene_df = pd.read_msgpack(rdb.get('{}_counts'.format(gene)))
+    msgpack = rdb.get('{}_counts'.format(gene))
+    if msgpack is None:
+        return jsonify({
+            'data': [],
+            'errors': ['No counts for gene {} found'.format(gene)]
+        })
+    gene_df = pd.read_msgpack(msgpack)
     series_before = []
     series_after = []
     outliers = []
+    error_messages = []
     for i in range(len(cell_lines)):
         cell_line = cell_lines[i]
-        key = 'RPE_{}'.format(cell_line)
-        df = gene_df.loc[gene_df['cell_line'] == key]
+        # key = 'RPE_{}'.format(cell_line)
+        df = gene_df.loc[gene_df['cell_line'] == cell_line]
+        # if df.empty:
+        #     key = cell_line
+        #     df = gene_df.loc[gene_df['cell_line'] == key]
         if df.empty:
-            key = cell_line
-            df = gene_df.loc[gene_df['cell_line'] == key]
-            if df.empty:
-                continue
+            error_messages.append('No counts for gene: {} and cell line: {}. '.format(gene, cell_line))
+            continue
 
         # keep only the ones that are within +3 to -3 standard deviations
         without_outliers = df[np.abs(df.norm_counts - df.norm_counts.mean()) <= (3 * df.norm_counts.std())]
@@ -198,6 +205,7 @@ def get_norm_counts(gene, cell_lines):
                 'cell_line': cell_line,
                 'color': 'black' if treatment == 'After Treatment' else '#7cb5ec'
             })
+
     counts_series = [{
             'name': 'Before Treatment',
             'data': series_before,
@@ -215,4 +223,7 @@ def get_norm_counts(gene, cell_lines):
             }
         }
     ]
-    return jsonify(counts_series)
+    return jsonify({
+        'data': counts_series,
+        'errors': error_messages,
+    })

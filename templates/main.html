@@ -149,6 +149,14 @@
         <div class="w-100">
           <button type="button" class="btn btn-sm btn-outline-info d-none float-right" id="hide_counts">Hide Counts</button>
         </div><br></div> {# this br and div have to be exactly like this!! otherwise button is somewhere else #}
+        {# error messages #}
+
+        <div class="alert alert-danger mt-2 d-none" role="alert" id="error_div">
+          <div class="row">
+            <div class="col col-xs-10" id="error_messages"></div>
+            <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+          </div>
+        </div>
 
         <div class="row">
           <div id="cell_line_chart" data-plot-series="{{ plot_series }}" data-genes="{{ genes }}" class="col-sm-12"></div>
