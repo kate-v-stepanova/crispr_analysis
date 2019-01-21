@@ -12,11 +12,8 @@
           {% if plot_series %} area-expanded="true" {% endif %}>Instructions</button>
       </h5>
     </div>
-    <div id="instructions" class="collapse show" area-labelledby="help_header" data-parent="#accordion">
+    <div id="instructions" class="collapse" area-labelledby="help_header" data-parent="#accordion">
       <div class="card-body">
-        <div class="alert alert-danger mt-2" role="alert">
-          PLEASE read the following instructions before you start importing the data
-        </div>
         <div class="alert alert-secondary" role="alert">
           <p>1. Please make sure that data you are trying to import has required format.</p>
           <p>2. If you are in doubt, please take a look at the <b>example files</b> (see below).
@@ -60,10 +57,14 @@
           {% if not plot_series %} aria-expanded="true" {% endif %}>Import Data</button>
       </h5>
     </div>
-    <div id="data_import" class="collapse" area-labelledby="import_header" data-parent="#accordion">
+    <div id="data_import" class="collapse show" area-labelledby="import_header" data-parent="#accordion">
       <div class="card-body">
-
         <form action="" method="POST" enctype="multipart/form-data" id="import_form">
+
+        <div class="alert alert-danger mt-2" role="alert">
+          PLEASE read the instructions <b>(above)</b> before you start importing the data
+        </div>
+
           <label for="data_type">What do you want to import?</label>
           <select name="data_type" class="custom-select mb-2" id="data_type">
             <option value="fold_changes" {% if selected_data_type=="fold_changes" %}selected{% endif %}>Fold change and p values</option>
