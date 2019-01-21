@@ -33,19 +33,24 @@
           <p>9. After you pressed <b>Update Database</b> button, please <b>DO NOT</b> close the browser,
             <b>DO NOT</b> reload the page, <b>DO NOT</b> click any buttons. Just <b>wait</b> until you see a green message
             (if import was successfuly) or a red message (if import has failed)</b></p>
+          <p>10. If the import has failed, this DID NOT affect any data which has already been imported before. It only means that the new data has not been imported. Try again, but do not flush database.</p>
         </div>
         <ul class="list-group border-primary">
           <li class="list-group-item">Example of file with <b>fold change and pvalues</b> (WITHOUT drugs):
-              <a class="link link-secondary download_example" href="#fc_pval_without_drugs" id="fc_pval_without_drugs">Download file</a>
+              <a class="link link-secondary download_example" href="#" onclick='return false'
+                 id="fc_pval_without_drugs">Download file</a>
           </li>
           <li class="list-group-item">Example of file with <b>fold change and pvalues</b> (WITH drugs):
-              <a class="link link-secondary download_example" id="fc_pval_with_drugs" href="#fc_pval_with_drugs">Download file</a></li>
+              <a class="link link-secondary download_example" id="fc_pval_with_drugs" href="#"
+                 onclick='return false'>Download file</a></li>
         </ul>
         <ul class="list-group mt-2  ">
           <li class="list-group-item">Example of file with <b>normalized counts</b> (WITHOUT drugs):
-              <a class="link link-secondary download_example" href="#norm_counts_without_drugs" id="norm_counts_without_drugs">Download file</a></li>
+              <a class="link link-secondary download_example" href="#"onclick='return false'
+                 id="norm_counts_without_drugs">Download file</a></li>
           <li class="list-group-item">Example of file with <b>normalized counts</b> (WITH drugs):
-              <a class="link link-secondary download_example" href="#norm_counts_with_drugs" id="norm_counts_with_drugs">Download file</a></li>
+              <a class="link link-secondary download_example" onclick='return false'
+                 href="#" id="norm_counts_with_drugs">Download file</a></li>
         </ul>
       </div>
     </div>
