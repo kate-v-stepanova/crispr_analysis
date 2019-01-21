@@ -28,12 +28,13 @@ def show_scatter_plot():
         apply_filters = request.form.get('apply_filters') is not None
         wt_fc_max = float(request.form.get('wt_fc_max'))
         wt_fc_min = float(request.form.get('wt_fc_min'))
-        wt_pval = float(request.form.get('wt_pval_max'))
+        wt_pval = float(request.form.get('wt_pval'))
         wt_pval_less_or_greater = request.form.get('wt_pval_less_or_greater')
         other_fc_max = float(request.form.get('other_fc_max'))
         other_fc_min = float(request.form.get('other_fc_min'))
         other_pval = float(request.form.get('other_pval_max'))
         other_pval_less_or_greater = request.form.get('other_pval_less_or_greater')
+        print(other_fc_max, other_fc_min, other_pval, other_pval_less_or_greater)
 
         joint_df = None
         wt_df = None
@@ -149,10 +150,10 @@ def show_scatter_plot():
                                     'wt_fc_min': wt_fc_min,
                                     'wt_pval': wt_pval,
                                     'wt_pval_less_or_greater': wt_pval_less_or_greater,
-                                    'fc_max': other_fc_max,
-                                    'fc_min': other_fc_min,
-                                    'pval': other_pval,
-                                    'pval_less_or_greater': other_pval_less_or_greater,
+                                    'other_fc_max': other_fc_max,
+                                    'other_fc_min': other_fc_min,
+                                    'other_pval': other_pval,
+                                    'other_pval_less_or_greater': other_pval_less_or_greater,
                                })
 
 # js post request - called on selected an entity from a list

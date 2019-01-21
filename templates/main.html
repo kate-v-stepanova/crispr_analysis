@@ -66,7 +66,7 @@
                     </div>
                     <div class="col-sm-8">
                       <input class="form-control input-sm" type="number" name="wt_fc_max" min="0.0" step="0.01" id="wt_fc_max"
-                         value="{% if selected_filters %}{{ selected_filters.get('wt_fc_max') }}{% else %}1.5{% endif %}">
+                         value="{% if selected_filters %}{{ selected_filters.get('wt_fc_max') }}{% else %}1.0{% endif %}">
                       <input class="form-control input-sm mt-1" type="number" name="wt_fc_min" min="0.0" step="0.01" id="wt_fc_min"
                          value="{% if selected_filters %}{{ selected_filters.get('wt_fc_min') }}{% else %}0.67{% endif %}">
                     </div>
@@ -93,8 +93,8 @@
                     </div>
                   </div>
                   <div class="col-sm-8 mt-2">
-                    <input class="form-control" type="number" name="wt_pval_max" min="0.0" step="0.01" id="wt_pval_max"
-                       value="{% if selected_filters %}{{ selected_filters.get('wt_pval_max') }}{% else %}0.15{% endif %}">
+                    <input class="form-control" type="number" name="wt_pval" min="0.0" step="0.01" id="wt_pval"
+                       value="{% if selected_filters %}{{ selected_filters.get('wt_pval') }}{% else %}0.15{% endif %}">
                   </div>
                 </div>
               </div>
@@ -141,8 +141,8 @@
                     </div>
                   </div>
                   <div class="col-sm-8 mt-2">
-                    <input class="form-control" type="number" name="other_pval_max" min="0.0" step="0.01" id="other_pval_max"
-                      value="{% if selected_filters %}{{ selected_filters.get('other_pval_max') }}{% else %}0.15{% endif %}">
+                    <input class="form-control" type="number" name="other_pval" min="0.0" step="0.01" id="other_pval"
+                      value="{% if selected_filters %}{{ selected_filters.get('other_pval') }}{% else %}0.15{% endif %}">
                   </div>
                 </div>
               </div>
