@@ -32,7 +32,7 @@ def show_scatter_plot():
         wt_pval_less_or_greater = request.form.get('wt_pval_less_or_greater')
         other_fc_max = float(request.form.get('other_fc_max'))
         other_fc_min = float(request.form.get('other_fc_min'))
-        other_pval = float(request.form.get('other_pval_max'))
+        other_pval = float(request.form.get('other_pval'))
         other_pval_less_or_greater = request.form.get('other_pval_less_or_greater')
         print(other_fc_max, other_fc_min, other_pval, other_pval_less_or_greater)
 
