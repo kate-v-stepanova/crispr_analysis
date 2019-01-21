@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <script src="{{ url_for('static', filename='js/data_import.js') }}"></script>
-<form action="" method="POST" enctype="multipart/form-data">
+<form action="" method="POST" enctype="multipart/form-data" id="import_form">
   <label for="data_type">What do you want to import?</label>
   <select name="data_type" class="custom-select mb-2" id="data_type">
     <option value="fold_changes" {% if selected_data_type=="fold_changes" %}selected{% endif %}>Fold change and p values</option>
