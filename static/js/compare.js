@@ -118,18 +118,15 @@ $(document).ready(function() {
 
     $(document).on('change', '#first_cell_line', function() {
         var cell_line = $('#first_cell_line').val();
+        console.log(cell_line);
         if (cell_line != 'select_cell_line') {
             $('#x_axis_filter').find('h2').text('X Axis Filter: ' + cell_line);
-//            $('#x_axis_filter').find('h4').first().text(cell_line + '.FC value');
-//            $('#x_axis_filter').find('h4').last().text(cell_line + '.P value');
         }
     });
     $(document).on('change', '#multiple_cell_lines', function() {
         var cell_line = $('#multiple_cell_lines').val();
         if (cell_line != 'select_cell_line') {
             $('#y_axis_filter').find('h2').text('Y Axis Filter: ' + cell_line);
-//            $('#y_axis_filter').find('h4').first().text(cell_line + '.FC value');
-//            $('#y_axis_filter').find('h4').last().text(cell_line + '.P value');
         }
     });
 
