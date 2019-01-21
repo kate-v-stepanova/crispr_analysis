@@ -8,10 +8,10 @@ import_page = Blueprint('data_import', __name__)
 def import_data():
     from crispr_analysis import get_db
     rdb = get_db()
+
     if request.method == 'POST':
         data_type = request.form.get('data_type')
         input_file = request.files.get('input_file')
-        # content = input_file.read()
         with_drugs = request.form.get('with_drugs')
         if data_type == "fold_changes":
             # doesn't matter with or without
@@ -125,16 +125,26 @@ def import_data():
                             day0vs21_df['cell_line'] = '{}_{}_day0vs21'.format(cell_line, drug)
                             day0vs21_df['treatment'] = 1
                             existing_df = existing_df.append(day0vs21_df.copy(), ignore_index=True)
+
                     if i + 100 < len(genes) and i%100 == 0:
                         print('writing {} to {} out of {} genes'.format(i, i+100, len(genes)))
                     elif i + 100 >= len(genes) and not last_printed:
                         last_printed = True
                         print('writing {} to {} out of {} genes'.format(i, len(genes), len(genes)))
-                import pdb; pdb.set_trace()
                 key = '{}_counts'.format(gene)
                 rdb.set(key, existing_df.to_msgpack())
-                return render_template('data_import.html', success="Data successfully imported")
+                return render_template('data_import.html',
+                                       selected_data_type=data_type,
+                                       with_drugs=with_drugs,
+                                       success="Data successfully imported",
+                )
 
         elif data_type == "flush_db":
             rdb.flushall()
     return render_template('data_import.html')
+
+@import_page.route('/download/<filename>', methods=['POST'])
+def download_file(filename):
+    filename = 'static/data_examples/{}.csv'.format(filename)
+    df = pd.read_csv(filename, sep='\t')
+    return df.to_csv(sep='\t', index=False)
