@@ -51,7 +51,7 @@ $(document).ready(function() {
 
     for(i=0; i<chart_containers.length; i++) {
         // initializing plot(s)
-        Highcharts.chart(chart_containers[i], {
+        var chart = Highcharts.chart(chart_containers[i], {
             chart: {
                 type: 'scatter',
                 zoomType: 'xy',
@@ -77,6 +77,11 @@ $(document).ready(function() {
             },
             plotOptions: {
                 scatter: {
+                    point: {
+                        events: {
+                            click: renderBoxplot
+                        }
+                    },
                     marker: {
                         radius: 5,
                         states: {
@@ -142,4 +147,78 @@ $(document).ready(function() {
             saveAs(blob, cell_lines + "_comparison.csv");
         });
     }
+
+    function renderBoxplot(e) {
+        var gene = this.gene_id;
+        var cell_lines = $('#multiple_cell_lines').val()+',' + $('#first_cell_line').val();
+        cell_lines = cell_lines.split(',');
+        $('#boxplot_data').removeClass('col-sm-0').addClass('col-sm-4');
+        $('#boxplot_data').removeClass('d-none');
+        $('#cell_line_chart').removeClass('col-sm-12').addClass('col-sm-8');
+        var chart_width = $('#cell_line_chart').width();
+        var chart_height = $('#cell_line_chart').height();
+        chart.setSize(chart_width, chart_height, doAnimation=true);
+        $('#hide_counts').removeClass('d-none');
+        $.post('/get_norm_counts/' + gene + "/" + cell_lines, function(data, status) {
+            if (status == 'success' && data.length != 0) {
+                if (data['errors'].length != 0) {
+                    $('#error_messages').html("");
+                    for (i=0; i<data['errors'].length; i++) {
+                        $('#error_messages').append("<p>"+data['errors'][i] + "</p>")
+                    }
+
+                    $('#error_div').removeClass('d-none');
+                }
+                Highcharts.chart('boxplot_data', {
+                    chart: {
+                        type: 'boxplot'
+                    },
+                    title: {
+                        text: 'Normalized Counts for gene: ' + gene
+                    },
+
+                    legend: {
+                        enabled: true
+                    },
+
+                    xAxis: {
+                        categories: cell_lines,
+                        title: {
+                            text: 'Cell Line'
+                        }
+                    },
+
+                    yAxis: {
+                        title: {
+                            text: 'Normalized counts'
+                        },
+                    },
+
+                    legend: {
+                        labelFormatter: function() {
+                            if (this.name == 'Outliers') {
+                                return 'click to hide outliers';
+                            } else {
+                                return this.name;
+                            }
+                        }
+                    },
+                    series: data['data'],
+                });
+            } else {
+                $('#boxplot_data').html('No data found for the gene <b>' + gene + "</b>");
+            }
+        });
+    }
+        // resize cell_line_chart when hide counts
+    $('#hide_counts').on('click', function() {
+        $('#hide_counts').addClass('d-none');
+        $('#boxplot_data').addClass('d-none');
+        $('#boxplot_data').removeClass('col-sm-4').addClass('col-sm-0');
+        $('#cell_line_chart').removeClass('col-sm-0').addClass('col-sm-12');
+        var chart_width = $('#cell_line_chart').width();
+        var chart_height = chart.height;
+        chart.setSize(chart_width, chart_height, doAnimation=true);
+    });
+
 });
