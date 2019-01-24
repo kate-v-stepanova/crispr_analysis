@@ -27,7 +27,7 @@ $(document).ready(function() {
 
     if (PLOT_SERIES.length != 0) {
         var chart_height = GENES.length * 25;
-        Highcharts.chart('heatmap_chart', {
+        var chart = Highcharts.chart('heatmap_chart', {
             chart: {
                 type: 'heatmap',
                 marginTop: 40,
@@ -71,12 +71,20 @@ $(document).ready(function() {
 
             tooltip: {
                 formatter: function () {
-                    return '<b>' + this.series.xAxis.categories[this.point.x] + '</b><br><b>gene: </b>' +
-                        this.series.yAxis.categories[this.point.y] + '</b><br><b>FC: </b>' + this.point.value +
+                    return '<b>' + this.point.cell_line + '</b><br><b>gene: </b>' +
+                    '<b>' + this.point.gene_id + '</b><br><b>FC: </b>' + this.point.value +
                         '<br><b>p value: </b>' + this.point.pval + '<br><b>increased essentiality: </b>' + this.point.inc_ess;
                 }
             },
 
+
+            plotOptions: {
+                series: {
+                    events: {
+                        click: renderBoxplot
+                    }
+                }
+            },
             series: [{
                 name: 'Fold Changes',
                 borderWidth: 1,
@@ -92,4 +100,82 @@ $(document).ready(function() {
 
         });
     }
+
+    function renderBoxplot(e) {
+        var gene = e.point.gene_id;
+        var cell_lines = $('#multiple_cell_lines').val();
+        $('#boxplot_data').removeClass('col-sm-0').addClass('col-sm-4');
+        $('#boxplot_data').removeClass('d-none');
+        $('#heatmap_chart').removeClass('col-sm-12').addClass('col-sm-8');
+        var chart_width = $('#cell_line_chart').width();
+        var chart_height = $('#cell_line_chart').height();
+        chart.setSize(chart_width, chart_height, doAnimation=true);
+        $('#hide_counts').removeClass('d-none');
+        $.post('/get_norm_counts/' + gene + "/" + cell_lines, function(data, status) {
+            if (status == 'success' && data.length != 0) {
+                if (data['errors'].length != 0) {
+                    $('#error_messages').html("");
+                    for (i=0; i<data['errors'].length; i++) {
+                        $('#error_messages').append("<p>"+data['errors'][i] + "</p>")
+                    }
+                    $('#error_div').removeClass('d-none');
+                }
+                Highcharts.chart('boxplot_data', {
+                    chart: {
+                        type: 'boxplot',
+                        height: '500',
+                    },
+                    title: {
+                        text: 'Normalized Counts for gene: ' + gene
+                    },
+
+                    legend: {
+                        enabled: true
+                    },
+
+                    xAxis: {
+                        categories: cell_lines,
+                        title: {
+                            text: 'Cell Line'
+                        }
+                    },
+
+                    yAxis: {
+                        title: {
+                            text: 'Normalized counts'
+                        },
+                    },
+
+                    legend: {
+                        labelFormatter: function() {
+                            if (this.name == 'Outliers') {
+                                return 'click to hide outliers';
+                            } else {
+                                return this.name;
+                            }
+                        }
+                    },
+                    series: data['data'],
+                });
+            } else {
+                $('#boxplot_data').html('No data found for the gene <b>' + gene + "</b>");
+            }
+        });
+    }
+
+    $(document).on('click', 'span.close', function() {
+        $(this).closest('div.alert').addClass('d-none');
+    });
+
+    // resize cell_line_chart when hide counts
+    $('#hide_counts').on('click', function() {
+        $('#hide_counts').addClass('d-none');
+        $('#boxplot_data').addClass('d-none');
+        $('#boxplot_data').removeClass('col-sm-4').addClass('col-sm-0');
+        $('#heatmap_chart').removeClass('col-sm-0').addClass('col-sm-12');
+        var chart_width = $('#cell_line_chart').width();
+        var chart_height = chart.height;
+        chart.setSize(chart_width, chart_height, doAnimation=true);
+    });
+
 });
