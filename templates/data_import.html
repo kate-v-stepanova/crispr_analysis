@@ -23,14 +23,15 @@
           <p>4. The header must contain <b>at least</b> the columns which are in the example files</p>
           <p>5. The order of columns <b>does not</b> matter. If you have more columns in your file, this is also fine. </p>
           <p>6. The columns <b>must</b> be separated by <b>tab</b>, not spaces, not commas, etc</p>
-          <p>7. It is highly <b>not recommended</b> to flush database. If you are deleting everything, make sure <b>beforehand</b>
+          <p>7. The <b>cell line names</b> in normalized counts <b>must</b> be the <b>same</b> as in fc and pval files</p>
+          <p>8. It is highly <b>not recommended</b> to flush database. If you are deleting everything, make sure <b>beforehand</b>
             that you will be able to restore the data (means you have <b>exaclty the same files</b> which were uploaded previously)</p>
-          <p>8. Import of <b>fold change and pvalues</b> takes relatively short time (some minutes maybe), where import of
+          <p>9. Import of <b>fold change and pvalues</b> takes relatively short time (some minutes maybe), where import of
             normalized counts can take significantly <b>longer</b> (be ready to wait 2 hours).</p>
-          <p>9. After you pressed <b>Update Database</b> button, please <b>DO NOT</b> close the browser,
+          <p>10. After you pressed <b>Update Database</b> button, please <b>DO NOT</b> close the browser,
             <b>DO NOT</b> reload the page, <b>DO NOT</b> click any buttons. Just <b>wait</b> until you see a green message
             (if import was successfuly) or a red message (if import has failed)</b></p>
-          <p>10. If the import has failed, this DID NOT affect any data which has already been imported before. It only means that the new data has not been imported. Try again, but do not flush database.</p>
+          <p>11. If the import has failed, this DID NOT affect any data which has already been imported before. It only means that the new data has not been imported. Try again, but do not flush database.</p>
         </div>
         <ul class="list-group border-primary">
           <li class="list-group-item">Example of file with <b>fold change and pvalues</b> (WITHOUT drugs):
@@ -82,6 +83,15 @@
             <input type="file" class="custom-file-input" id="input_file" name="input_file">
             <label class="custom-file-label" for="input_file">Select file</label>
           </div>
+
+          {# get notifications #}
+          <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" value="true" id="notify"
+                {% if notify=="true" %} checked {% endif %} name="notify">
+            <label class="form-check-label" for="notify">Notify by email when finished</label>
+          </div>
+          <input type="email" class="form-control {% if not email %}d-none{% endif %} mt-2"
+                 id="email" name="email" placeholder="Enter email" value="{{ email }}">
 
           <button class="btn btn-outline-info mt-2" type="submit">Update database</button>
 

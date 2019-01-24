@@ -14,4 +14,13 @@ $(document).ready(function() {
             saveAs(blob, filename + '.csv');
         });
     });
+
+
+    $(document).on('change', '#notify', function() {
+        if(this.checked) {
+          $('#email').removeClass('d-none');
+        } else {
+            $('#email').addClass('d-none');
+        }
+    });
 });
