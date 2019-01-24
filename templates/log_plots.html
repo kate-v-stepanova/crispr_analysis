@@ -4,6 +4,7 @@
 <script src="{{ url_for('static', filename='js/log_plots.js') }}"></script>
 <script src="{{ url_for('static', filename='js_libraries/exporting.js') }}"></script>
 <script src="{{ url_for('static', filename='js_libraries/offline-exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/highcharts-more.js') }}"></script>
 <form action="" method="POST">
   <label for="cell_line_select">Select cell line:</label>
   <select name="cell_line" class="custom-select" id="cell_line_select">
@@ -43,6 +44,23 @@
   <button class="btn btn-outline-info mt-4" type="submit" id="plot_button">Plot data</button>
 </form>
 
-<div id="cell_line_chart" data-plot-series="{{ plot_series }}" data-genes="{{ genes }}" data-left-line="{{ left }}"
+
+  <div class="w-100">
+    <button type="button" class="btn btn-sm btn-outline-info d-none float-right" id="hide_counts">Hide Counts</button>
+  </div><br></div> {# this br and div have to be exactly like this!! otherwise button is somewhere else #}
+  {# error messages #}
+
+    <div class="alert alert-danger mt-2 d-none" role="alert" id="error_div">
+      <div class="row">
+        <div class="col col-xs-10" id="error_messages"></div>
+        <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+      </div>
+    </div>
+
+<div id="cell_line_chart" class="col-sm-12" data-plot-series="{{ plot_series }}" data-genes="{{ genes }}" data-left-line="{{ left }}"
     data-right-line="{{ right }}" data-bottom-line="{{ bottom }}"></div>
+<div class="row d-none" id="plot_with_counts">
+  <div id="cell_line_chart_small" class="col-sm-8"></div>
+  <div id="boxplot_data" class="col-sm-4"></div>
+</div>
 {% endblock %}
