@@ -11,8 +11,10 @@ def import_data():
 
     if request.method == 'POST':
         data_type = request.form.get('data_type')
-        input_file = request.files.get('input_file')
         with_drugs = request.form.get('with_drugs')
+        input_file = request.files.get('input_file')
+        if input_file is None:
+            return render_template('data_import.html', selected_data_type=data_type, with_drugs=with_drugs, error="Please select file!")
         email = request.form.get('email')
         notify = request.form.get('notify') == 'true'
         try:
@@ -53,6 +55,21 @@ def import_data():
             elif data_type == "norm_counts":
                 if with_drugs == 'without_drugs':
                     full_df = pd.read_csv(input_file, sep='\t')
+
+                    error = ''
+                    required = ['cell_line', 'sample', 'gene_id', 'day', 'norm_counts']
+                    if not set(required).issubset(set(full_df.columns)):
+                        error = 'ERROR: incorrect header! \n'
+                        error += 'Required columns: {}\n'.format(', '.join(required))
+                        error += "Given: {}\n".format(', '.join(full_df.columns))
+                    if error:
+                        error += 'Filename: {}\n'.format(input_file.filename)
+                        error += "Please read the instructions once again!!"
+                        return render_template('data_import.html',
+                           selected_data_type=data_type,
+                           with_drugs=with_drugs,
+                            error=error,
+                        )
                     genes = full_df['gene_id'].unique()
                     cell_lines = full_df['cell_line'].unique()
                     last_part = False
@@ -79,8 +96,23 @@ def import_data():
                         send_email(email,message=success)
                     return render_template('data_import.html', success=success)
                 elif with_drugs == 'with_drugs':
-                    last_printed = False # for print message
                     full_df = pd.read_csv(input_file, sep='\t')
+
+                    error = ''
+                    required = ['cell_line', 'sample', 'gene_id', 'day', 'norm_counts']
+                    if not set(required).issubset(set(full_df.columns)):
+                        error = 'ERROR: incorrect header! \n'
+                        error += 'Required columns: {}\n'.format(', '.join(required))
+                        error += "Given: {}\n".format(', '.join(full_df.columns))
+                    if error:
+                        error += 'Filename: {}\n'.format(input_file.filename)
+                        error += "Please read the instructions once again!!"
+                        return render_template('data_import.html',
+                           selected_data_type=data_type,
+                           with_drugs=with_drugs,
+                            error=error,
+                        )
+                    last_printed = False # for print message
                     cell_lines = full_df['cell_line'].unique()
                     genes = full_df['gene_id'].unique()
                     drugs = full_df['sample'].unique()  # this is only for day 21
