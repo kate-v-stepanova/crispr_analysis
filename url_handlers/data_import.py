@@ -13,7 +13,7 @@ def import_data():
         data_type = request.form.get('data_type')
         with_drugs = request.form.get('with_drugs')
         input_file = request.files.get('input_file')
-        if input_file is None:
+        if data_type != 'flush_db' and input_file is None:
             return render_template('data_import.html', selected_data_type=data_type, with_drugs=with_drugs, error="Please select file!")
         email = request.form.get('email')
         notify = request.form.get('notify') == 'true'
