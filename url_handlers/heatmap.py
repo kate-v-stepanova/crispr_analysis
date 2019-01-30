@@ -1,92 +1,65 @@
-import math
-
 from flask import Blueprint, render_template, request
 import pandas as pd
 import numpy as np
 
+heatmap_page = Blueprint('heatmap', __name__)
 
-log_plots_page = Blueprint('log_plots', __name__)
+@heatmap_page.route('/heatmap', methods=['GET', 'POST'])
+def show_heatmap():
 
-@log_plots_page.route('/log_plots', methods=['GET', 'POST'])
-def get_log_plots():
     from crispr_analysis import get_db
     rdb = get_db()
     cell_lines = rdb.smembers('cell_lines')
+
+    # I don't like the idea of manually fixing the strings, but I couldn't find a better way
     cell_lines = [cell_line.decode('utf-8') for cell_line in cell_lines]
 
-    if request.method == 'GET':
-        return render_template('log_plots.html', cell_lines=cell_lines)
-
     if request.method == 'POST':
-        cell_line = request.form['cell_line']
-        df = pd.read_msgpack(rdb.get(cell_line))
-        df = df[['gene_id', 'fc', 'pval']]
+        selected_cell_lines = request.form.getlist('cell_lines')
+        selected_genes = request.form.get('selected_genes').strip().split()
+        joint_df = None
+        for cell_line in selected_cell_lines:
+            df = pd.read_msgpack(rdb.get(cell_line))
+            df = df[['gene_id', 'fc', 'pval', 'inc_ess']]
+            if cell_line == 'WT':
+                df['inc_ess'] = 'n/a'
+            df.fc.astype(float)
+            df.pval.astype(float)
+            df.columns = ['gene_id', '{}_fc'.format(cell_line), '{}_pval'.format(cell_line), '{}_inc_ess'.format(cell_line)]
 
-        #  dash lines
-        left = float(request.form.get('left'))
-        right = float(request.form.get('right'))
-        bottom = float(request.form.get('bottom'))
+            if joint_df is None:
+                joint_df = df.copy()
+            else:
+                joint_df = pd.merge(joint_df, df, how='outer', on='gene_id')
 
-        left_line = round(math.log2(left), 2)
-        right_line = round(math.log2(right), 2)
-        bottom_line = -round(math.log10(bottom), 2)
+        joint_df = joint_df.loc[joint_df['gene_id'].isin(selected_genes)].reset_index()
+        joint_df = joint_df.round(decimals=3)
+        plot_series = []
+        for i, row in joint_df.iterrows():
+            for cell_line in selected_cell_lines:
+                plot_series.append({
+                    'x': selected_cell_lines.index(cell_line),
+                    'y': i,
+                    'cell_line': cell_line,
+                    'gene_id': row['gene_id'],
+                    'pval': row['{}_pval'.format(cell_line)],
+                    'fc': row['{}_fc'.format(cell_line)],
+                    'value': row['{}_fc'.format(cell_line)],
+                    'inc_ess': row['{}_inc_ess'.format(cell_line)]
+                })
 
-        genes = df['gene_id'].tolist()
-        df['log_2_fc'] = df['fc'].apply(lambda x: math.log2(x))
-        df['minus_log_10_pval'] = df['pval'].apply(lambda y: -math.log10(y) if y != 0 else np.nan)
+        # to keep the order of genes
+        selected_genes=joint_df['gene_id'].tolist()
 
-        df = df.round(decimals=3)
-        max_val = df['minus_log_10_pval'].max().round(decimals=3)
+        return render_template('heatmap.html', cell_lines=cell_lines, selected_cell_lines=selected_cell_lines,
+                               selected_genes=selected_genes, plot_series=plot_series)
 
-        df.columns = ['gene_id', 'fc', 'pval', 'x', 'y']
-        left_df = df.loc[(df['fc'] <= left) & (df['pval'] <=bottom)]
-        right_df = df.loc[(df['fc'] >= right) & (df['pval'] <=bottom)]
-        bottom_df = df[~df.isin(left_df) & ~df.isin(right_df)].dropna()
-        right_df = right_df.fillna(max_val+0.5)
-        left_df = left_df.fillna(max_val+0.5)
-        plot_series = [{
-                'name': cell_line,
-                'data': list(bottom_df.dropna().T.to_dict().values()),
-                'turboThreshold': len(bottom_df),
-                'marker': {
-                    'symbol': 'circle',
-                    'radius': 5,
-                },
-                'color': 'grey',
-            },
-            {
-                'name': cell_line,
-                'data': list(left_df.dropna().T.to_dict().values()),
-                'turboThreshold': len(left_df),
-                'color': 'blue',
-                'marker': {
-                    'symbol': 'circle',
-                    'radius': 5,
-                },
-            },
-            {
-                'name': cell_line,
-                'data': list(right_df.dropna().T.to_dict().values()),
-                'turboThreshold': len(right_df),
-                'color': 'red',
-                'marker': {
-                    'symbol': 'circle',
-                    'radius': 5,
-                },
-        }]
-        return render_template('log_plots.html', cell_lines=cell_lines, selected_cell_line=cell_line,
-                               plot_series=plot_series, genes=genes, right=right_line, left=left_line, bottom=bottom_line,
-                               selected_thresholds = {
-                                   'left': left,
-                                   'right': right,
-                                   'bottom': bottom,
-                               }
-                               )
+    return render_template('heatmap.html', cell_lines=cell_lines)
 
 
 
 # js post request - called on selected an entity from a list
-@log_plots_page.route('/get_norm_counts/<gene>/<cell_lines>', methods=['POST'])
+@heatmap_page.route('/get_norm_counts/<gene>/<cell_lines>', methods=['POST'])
 def get_norm_counts(gene, cell_lines):
     # this import has to be here!!
     from crispr_analysis import get_db
@@ -168,3 +141,5 @@ def get_norm_counts(gene, cell_lines):
         'data': counts_series,
         'errors': error_messages,
     })
+
+

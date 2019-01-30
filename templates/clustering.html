@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css_libraries/choices.min.css') }}">
+<script src="{{ url_for('static', filename='js_libraries/choices.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/highcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/clustering.js') }}"></script>
+{# end of imports #}
+<div>
+  <form action="" method="POST">
+    <div class="from-group">
+      <label for="multiple_cell_lines" class="mt-3">Select cell lines:</label>
+      <select multiple name="cell_lines" id="multiple_cell_lines" placeholder="Search cell line">
+        {% for cell_line in cell_lines %}
+          <option value="{{ cell_line }}" name="{{ cell_line }}" {% if cell_line in selected_cell_lines %}selected{% endif %}>
+            {{ cell_line }}</option>
+        {% endfor %}
+      </select>
+      <label>Select clustering method:</label>
+       <select name="clustering_method" class="custom-select">
+        <option name="kmeans" {% if clustering_method=="kmeans" %} selected {% endif %} value="kmeans">K Means</option>
+        <option name="dbscan" {% if clustering_method=="dbscan" %} selected {% endif %} value="dbscan">DBSCAN</option>
+      </select>
+      <label class="mt-2">Filter genes:</label>
+      <select name="filter_data" id="filter_data" class="custom-select">
+        <option name="do_not_filter" {% if selected_filter=="do_not_filter" %}selected{% endif %} value="do_not_filter">Do not filter</option>
+        <option name="by_thresholds" {% if selected_filter=="by_thresholds" %}selected{% endif %} value="by_thresholds">By thresholds</option>
+        <option name="by_list_of_genes" {% if selected_filter=="by_list_of_genes" %}selected{% endif %} value="by_list_of_genes">By list of genes</option>
+      </select>
+      <div id="filter_by_genes" class="{% if selected_filter!='by_list_of_genes' %}d-none{% endif %}">
+        <label class="mb-0 mt-2">Enter list of genes to plot:</label><br>
+        <label class="mt-0 text-sm">allowed delimiters: space, tab, newline</label>
+        <textarea class="form-control" rows="5" id="selected_genes" name="selected_genes">{{ selected_genes | join('\n') }}</textarea>
+      </div>
+      <div id="filter_by_thresholds" class="ml-2 mt-3 row {% if selected_filter!='by_thresholds' %}d-none{% endif %}">
+        {# X AXIS #}
+          {# FC #}
+          <div class="list-group col-sm-6" id="wt_filter">
+            <h2>WT Filter</h2>
+            <div class="list-group-item">
+              <h4 class="list-item-heading">FC value</h4>
+              <div class="list-group-item-text">
+                <div class="row">
+                  <div class="col-sm-4">
+                    <label class="mt-2" for="wt_fc_max">Max fc value:</label><br>
+                    <label class="mt-2" for="wt_fc_min">Min fc value:</label>
+                  </div>
+                  <div class="col-sm-8">
+                    <input class="form-control input-sm" type="number" name="wt_fc_max" min="0.0" step="0.01" id="wt_fc_max"
+                       value="{% if selected_thresholds %}{{ selected_thresholds.get('wt_fc_max') }}{% else %}1.0{% endif %}">
+                    <input class="form-control input-sm mt-1" type="number" name="wt_fc_min" min="0.0" step="0.01" id="wt_fc_min"
+                       value="{% if selected_thresholds %}{{ selected_thresholds.get('wt_fc_min') }}{% else %}0.67{% endif %}">
+                  </div>
+                </div>
+              </div>
+            </div>
+            {# P VALUE #}
+            <div class="list-group-item">
+              <h4 class="list-item-heading">P value</h4>
+              <div class="list-group-item-text row">
+                <div class="col-sm-4">
+                <label class="mt-2">Less or equal then:</label>
+                </div>
+                <div class="col-sm-8">
+                  <input class="form-control" type="number" name="wt_pval_max" min="0.0" step="0.01" id="wt_pval_max"
+                       value="{% if selected_thresholds %}{{ selected_thresholds.get('wt_pval') }}{% else %}0.15{% endif %}">
+                </div>
+              </div>
+            </div>
+          </div>
+          {# OTHER CELL LINES #}
+          <div class="list-group col-sm-6" id="y_axis_filter">
+            <h2>Other Cell Lines Filter</h2>
+            <div class="list-group-item">
+            {# FC value #}
+            <h4 class="list-item-heading">FC value</h4>
+              <div class="list-group-item-text">
+                <div class="row">
+                  <div class="col-sm-4">
+                    <label class="mt-2" for="fc_max">Max fc value:</label><br>
+                    <label class="mt-2" for="fc_min">Min fc value:</label>
+                  </div>
+                  <div class="col-sm-8">
+                    <input class="form-control input-sm" type="number" name="fc_max" min="0.0" step="0.01" id="fc_max"
+                       value="{% if selected_thresholds %}{{ selected_thresholds.get('fc_max') }}{% else %}0.67{% endif %}">
+                    <input class="form-control input-sm mt-1" type="number" name="fc_min" min="0.0" step="0.01" id="fc_min"
+                       value="{% if selected_thresholds %}{{ selected_thresholds.get('fc_min') }}{% else %}0{% endif %}">
+                  </div>
+                </div>
+              </div>
+            </div>
+            {# P VALUE #}
+            <div class="list-group-item">
+            <h4 class="list-item-heading">P value</h4>
+              <div class="list-group-item-text row">
+                <div class="col-sm-4">
+                  <label class="mt-2">Less or equal then:</label>
+                </div>
+                <div class="col-sm-8">
+                  <input class="form-control" type="number" name="pval_max" min="0.0" step="0.01" id="pval_max"
+                       value="{% if selected_thresholds %}{{ selected_thresholds.get('pval') }}{% else %}0.15{% endif %}">
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+    <button class="btn btn-outline-info mt-4" type="submit" id="cluster_genes">Cluster genes</button>
+  </form>
+</div>
+<div id="cluster_plot" data-plot-series="{{ plot_series }}" data-genes="{{ selected_genes }}"></div>
+{% endblock %}

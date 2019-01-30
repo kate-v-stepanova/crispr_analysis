@@ -1,0 +1,2 @@
+gene_id	WT_fc	MSH2_fc	MSH6_fc	MLH1_fc	WT_pval	MSH2_pval	MSH6_pval	MLH1_pval	XPC_fc	ERCC5_fc	XPC_pval	ERCC5_pval	increasedEssential_MSH2	increasedEssential_MSH6	increasedEssential_MLH1	increasedEssential_XPC	increasedEssential_ERCC5
+RNASEH2A	0.50080033	0.62368358	0.4908452	0.6170829	0.3458111	0.48339713	0.78580202	0.48339713	0.78580202	0.60695838	0.31174167	0.36911443	no	no	yes	yes	yes

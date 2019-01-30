@@ -51,7 +51,7 @@ $(document).ready(function() {
 
     for(i=0; i<chart_containers.length; i++) {
         // initializing plot(s)
-        Highcharts.chart(chart_containers[i], {
+        var chart = Highcharts.chart(chart_containers[i], {
             chart: {
                 type: 'scatter',
                 zoomType: 'xy',
@@ -77,6 +77,11 @@ $(document).ready(function() {
             },
             plotOptions: {
                 scatter: {
+                    point: {
+                        events: {
+                            click: renderBoxplot
+                        }
+                    },
                     marker: {
                         radius: 5,
                         states: {
@@ -107,6 +112,7 @@ $(document).ready(function() {
             }
         });
     }
+
     $(document).on('change', '#apply_filters', function() {
         if(this.checked) {
           $('#data_filters').removeClass('d-none');
@@ -117,18 +123,102 @@ $(document).ready(function() {
 
     $(document).on('change', '#first_cell_line', function() {
         var cell_line = $('#first_cell_line').val();
+        console.log(cell_line);
         if (cell_line != 'select_cell_line') {
             $('#x_axis_filter').find('h2').text('X Axis Filter: ' + cell_line);
-//            $('#x_axis_filter').find('h4').first().text(cell_line + '.FC value');
-//            $('#x_axis_filter').find('h4').last().text(cell_line + '.P value');
         }
     });
     $(document).on('change', '#multiple_cell_lines', function() {
         var cell_line = $('#multiple_cell_lines').val();
         if (cell_line != 'select_cell_line') {
             $('#y_axis_filter').find('h2').text('Y Axis Filter: ' + cell_line);
-//            $('#y_axis_filter').find('h4').first().text(cell_line + '.FC value');
-//            $('#y_axis_filter').find('h4').last().text(cell_line + '.P value');
         }
     });
+
+    // export data table
+    var data_table = $('#data_table');
+    if (data_table.length != 0) {
+        var table_data = $(data_table).attr('table-csv-data');
+        $(data_table).removeAttr('table-csv-data');
+        $('#export_button').on('click', function() {
+            var cell_lines = $('#multiple_cell_lines').val() + ',' + $('#first_cell_line').val();
+            cell_lines = cell_lines.replace(/\,/g, '_');
+            var blob = new Blob([table_data], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, cell_lines + "_comparison.csv");
+        });
+    }
+
+    function renderBoxplot(e) {
+        var gene = this.gene_id;
+        var cell_lines = $('#multiple_cell_lines').val()+',' + $('#first_cell_line').val();
+        cell_lines = cell_lines.split(',');
+        $('#boxplot_data').removeClass('col-sm-0').addClass('col-sm-4');
+        $('#boxplot_data').removeClass('d-none');
+        $('#cell_line_chart').removeClass('col-sm-12').addClass('col-sm-8');
+        var chart_width = $('#cell_line_chart').width();
+        var chart_height = $('#cell_line_chart').height();
+        chart.setSize(chart_width, chart_height, doAnimation=true);
+        $('#hide_counts').removeClass('d-none');
+        $.post('/get_norm_counts/' + gene + "/" + cell_lines, function(data, status) {
+            if (status == 'success' && data.length != 0) {
+                if (data['errors'].length != 0) {
+                    $('#error_messages').html("");
+                    for (i=0; i<data['errors'].length; i++) {
+                        $('#error_messages').append("<p>"+data['errors'][i] + "</p>")
+                    }
+
+                    $('#error_div').removeClass('d-none');
+                }
+                Highcharts.chart('boxplot_data', {
+                    chart: {
+                        type: 'boxplot'
+                    },
+                    title: {
+                        text: 'Normalized Counts for gene: ' + gene
+                    },
+
+                    legend: {
+                        enabled: true
+                    },
+
+                    xAxis: {
+                        categories: cell_lines,
+                        title: {
+                            text: 'Cell Line'
+                        }
+                    },
+
+                    yAxis: {
+                        title: {
+                            text: 'Normalized counts'
+                        },
+                    },
+
+                    legend: {
+                        labelFormatter: function() {
+                            if (this.name == 'Outliers') {
+                                return 'click to hide outliers';
+                            } else {
+                                return this.name;
+                            }
+                        }
+                    },
+                    series: data['data'],
+                });
+            } else {
+                $('#boxplot_data').html('No data found for the gene <b>' + gene + "</b>");
+            }
+        });
+    }
+        // resize cell_line_chart when hide counts
+    $('#hide_counts').on('click', function() {
+        $('#hide_counts').addClass('d-none');
+        $('#boxplot_data').addClass('d-none');
+        $('#boxplot_data').removeClass('col-sm-4').addClass('col-sm-0');
+        $('#cell_line_chart').removeClass('col-sm-0').addClass('col-sm-12');
+        var chart_width = $('#cell_line_chart').width();
+        var chart_height = chart.height;
+        chart.setSize(chart_width, chart_height, doAnimation=true);
+    });
+
 });

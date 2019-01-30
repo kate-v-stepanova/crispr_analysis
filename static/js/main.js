@@ -27,14 +27,6 @@ $(document).ready(function() {
     $('#cell_line_chart').removeAttr('data-genes');
     $('#cell_line_chart').removeAttr('data-plot-series');
 
-
-    // init boxplot data as well
-    var NORM_COUNTS = $('#boxplot_data').attr('data-plot-series').replace(/'/g, '"'); //");
-    if (NORM_COUNTS.length != 0) {
-        NORM_COUNTS = JSON.parse(NORM_COUNTS);
-    };
-    $('#boxplot_data').removeAttr('data-plot-series');
-
     if (GENES.length != 0) {
         // initializing plot
         var cell_lines = $('#multiple_cell_lines').val();
@@ -100,50 +92,64 @@ $(document).ready(function() {
         });
     }
     function renderBoxplot(e) {
+        var gene = this.name;
+        var cell_lines = $('#multiple_cell_lines').val();
         $('#boxplot_data').removeClass('col-sm-0').addClass('col-sm-4');
         $('#boxplot_data').removeClass('d-none');
         $('#cell_line_chart').removeClass('col-sm-12').addClass('col-sm-8');
         var chart_width = $('#cell_line_chart').width();
-        var chart_height = chart.height;
+        var chart_height = $('#cell_line_chart').height();
         chart.setSize(chart_width, chart_height, doAnimation=true);
-        var gene = this.name;
-        var gene_series = NORM_COUNTS[gene];
         $('#hide_counts').removeClass('d-none');
-        Highcharts.chart('boxplot_data', {
-            chart: {
-                type: 'boxplot'
-            },
-            title: {
-                text: 'Normalized Counts for gene: ' + gene
-            },
-
-            legend: {
-                enabled: true
-            },
-
-            xAxis: {
-                categories: cell_lines,
-                title: {
-                    text: 'Cell Line'
-                }
-            },
-
-            yAxis: {
-                title: {
-                    text: 'Normalized counts'
-                },
-            },
-
-            legend: {
-                labelFormatter: function() {
-                    if (this.name == 'Outliers') {
-                        return 'click to hide outliers';
-                    } else {
-                        return this.name;
+        $.post('/get_norm_counts/' + gene + "/" + cell_lines, function(data, status) {
+            if (status == 'success' && data.length != 0) {
+                if (data['errors'].length != 0) {
+                    $('#error_messages').html("");
+                    for (i=0; i<data['errors'].length; i++) {
+                        $('#error_messages').append("<p>"+data['errors'][i] + "</p>")
                     }
+
+                    $('#error_div').removeClass('d-none');
                 }
-            },
-            series: gene_series
+                Highcharts.chart('boxplot_data', {
+                    chart: {
+                        type: 'boxplot'
+                    },
+                    title: {
+                        text: 'Normalized Counts for gene: ' + gene
+                    },
+
+                    legend: {
+                        enabled: true
+                    },
+
+                    xAxis: {
+                        categories: cell_lines,
+                        title: {
+                            text: 'Cell Line'
+                        }
+                    },
+
+                    yAxis: {
+                        title: {
+                            text: 'Normalized counts'
+                        },
+                    },
+
+                    legend: {
+                        labelFormatter: function() {
+                            if (this.name == 'Outliers') {
+                                return 'click to hide outliers';
+                            } else {
+                                return this.name;
+                            }
+                        }
+                    },
+                    series: data['data'],
+                });
+            } else {
+                $('#boxplot_data').html('No data found for the gene <b>' + gene + "</b>");
+            }
         });
     }
 
@@ -164,7 +170,12 @@ $(document).ready(function() {
         $(data_table).removeAttr('table-csv-data');
         $('#export_button').on('click', function() {
             var blob = new Blob([table_data], {type: "text/plain;charset=utf-8"});
-            saveAs(blob, cell_lines.join('_') + "_comparison.txt");
+            saveAs(blob, cell_lines.join('_') + "_comparison.csv");
         });
     }
+
+
+    $(document).on('click', 'span.close', function() {
+        $(this).closest('div.alert').addClass('d-none');
+    });
 });

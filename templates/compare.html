@@ -1,12 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/choices.min.css') }}">
-<script src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
-<script src="{{ url_for('static', filename='js/choices.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/exporting.js') }}"></script>
-<script src="{{ url_for('static', filename='js/offline-exporting.js') }}"></script>
-<script src="{{ url_for('static', filename='js/export-data.js') }}"></script>
-<script src="{{ url_for('static', filename='custom_js/compare.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css_libraries/choices.min.css') }}">
+<script src="{{ url_for('static', filename='js_libraries/highcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/choices.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/offline-exporting.js') }}"></script>
+<script src="{{ url_for('static', filename='js/compare.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/FileSaver.js') }}"></script>
+<script src="{{ url_for('static', filename='js_libraries/highcharts-more.js') }}"></script>
 <form action="" method="POST">
   <label for="first_cell_line">Select x axis:</label>
   <select name="x_axis" class="custom-select" id="first_cell_line">
@@ -43,26 +44,30 @@
 
   {# filter data #}
   <div class="form-check mt-4">
-    <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters">
+    <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters"
+           {% if apply_filters %}checked{% endif %}>
     <label class="form-check-label" for="apply_filters">Apply filters</label>
   </div>
 
-  <div class="row ml-2 d-none" id="data_filters">
+  <div class="row ml-2 {% if not apply_filters %}d-none{% endif %}" id="data_filters">
   {# X AXIS #}
     {# FC #}
-    <div class="list-group col-sm-6" id="wt_filter">
+    <div class="list-group col-sm-6" id="x_axis_filter">
       <h2>X axis Filter</h2>
       <div class="list-group-item">
         <h4 class="list-item-heading">FC value</h4>
         <div class="list-group-item-text">
           <div class="row">
             <div class="col-sm-4">
-              <label class="mt-2" for="wt_fc_max">Max fc value:</label><br>
-              <label class="mt-2" for="wt_fc_min">Min fc value:</label>
+              <label class="mt-2" for="x_fc_max">Max fc value:</label><br>
+              {# <label class="mt-2" for="x_fc_min">Min fc value:</label> #}
             </div>
             <div class="col-sm-8">
-              <input class="form-control input-sm" type="number" name="wt_fc_max" min="0.0" step="0.01" value="1.5" id="wt_fc_max">
-              <input class="form-control input-sm mt-1" type="number" name="wt_fc_min" min="0.0" step="0.01" value="0.67" id="wt_fc_min">
+              <input class="form-control input-sm" type="number" name="x_fc_max" min="0.0" step="0.01" id="x_fc_max"
+                 value="{% if selected_filter %}{{ selected_filter.get('x_fc_max') }}{% else %}1.0{% endif %}">
+              {# <input class="form-control input-sm mt-1" type="number" name="x_fc_min" min="0.0" step="0.01" id="x_fc_min"
+                 value="{% if selected_filter %}{{ selected_filter.get('x_fc_min') }}{% else %}0.67{% endif %}">
+              #}
             </div>
           </div>
         </div>
@@ -73,16 +78,23 @@
         <div class="list-group-item-text row">
           <div class="col-sm-4">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" id="wt_pval_less" name="wt_pval_less_or_greater" value="less" checked>
-              <label class="custom-control-label" for="wt_pval_less">Less than</label>
+              <input type="radio" class="custom-control-input" id="x_pval_less" name="x_pval_less_or_greater" value="less"
+                     {% if selected_filter %}
+                      {% if selected_filter.get('x_pval_less_or_greater') == 'less' %}checked{% endif %}
+                     {% else %}checked{% endif %}>
+              <label class="custom-control-label" for="x_pval_less">Less than</label>
             </div>
             <div class="custom-control custom-radio">
-                <input type="radio" class="custom-control-input" id="wt_pval_greater" name="wt_pval_less_or_greater" value="greater">
-                <label class="custom-control-label" for="wt_pval_greater">Greater than</label>
+              <input type="radio" class="custom-control-input" id="x_pval_greater" name="x_pval_less_or_greater" value="greater"
+                     {% if selected_filter %}
+                      {% if selected_filter.get('x_pval_less_or_greater') == 'greater' %}checked{% endif %}
+                     {% endif %}>
+              <label class="custom-control-label" for="x_pval_greater">Greater than</label>
             </div>
           </div>
           <div class="col-sm-8 mt-2">
-            <input class="form-control" type="number" name="wt_pval_max" min="0.0" step="0.01" value="0.15" id="wt_pval_max">
+              <input class="form-control" type="number" name="x_pval" min="0.0" step="0.01" id="x_pval"
+                   value="{% if selected_filter %}{{ selected_filter.get('x_pval') }}{% else %}0.15{% endif %}">
           </div>
         </div>
       </div>
@@ -97,11 +109,13 @@
           <div class="row">
             <div class="col-sm-4">
               <label class="mt-2" for="y_fc_max">Max fc value:</label><br>
-              <label class="mt-2" for="y_fc_min">Min fc value:</label>
+              {# <label class="mt-2" for="y_fc_min">Min fc value:</label>#}
             </div>
             <div class="col-sm-8">
-              <input class="form-control input-sm" type="number" name="y_fc_max" min="0.0" step="0.01" value="0.67" id="y_fc_max">
-              <input class="form-control input-sm mt-1" type="number" name="y_fc_min" min="0.0" step="0.01" value="0" id="y_fc_min">
+              <input class="form-control input-sm" type="number" name="y_fc_max" min="0.0" step="0.01" id="y_fc_max"
+                 value="{% if selected_filter %}{{ selected_filter.get('y_fc_max') }}{% else %}0.67{% endif %}">
+             {# <input class="form-control input-sm mt-1" type="number" name="y_fc_min" min="0.0" step="0.01" id="y_fc_min"
+                 value="{% if selected_filter %}{{ selected_filter.get('y_fc_min') }}{% else %}0.0{% endif %}"> #}
             </div>
           </div>
         </div>
@@ -110,18 +124,26 @@
       <div class="list-group-item">
       <h4 class="list-item-heading">P value</h4>
         <div class="list-group-item-text row">
+
           <div class="col-sm-4">
             <div class="custom-control custom-radio">
-              <input type="radio" class="custom-control-input" id="y_pval_less" name="y_pval_less_or_greater" value="less" checked>
+              <input type="radio" class="custom-control-input" id="y_pval_less" name="y_pval_less_or_greater" value="less"
+                     {% if selected_filter %}
+                      {% if selected_filter.get('y_pval_less_or_greater') == 'less' %}checked{% endif %}
+                      {% else %}checked{% endif %}>
               <label class="custom-control-label" for="y_pval_less">Less than</label>
             </div>
             <div class="custom-control custom-radio">
-                <input type="radio" class="custom-control-input" id="y_pval_greater" name="y_pval_less_or_greater" value="greater">
-                <label class="custom-control-label" for="y_pval_greater">Greater than</label>
+              <input type="radio" class="custom-control-input" id="y_pval_greater" name="y_pval_less_or_greater" value="greater"
+                     {% if selected_filter %}
+                      {% if selected_filter.get('y_pval_less_or_greater') == 'greater' %}checked{% endif %}
+                     {% endif %}>
+              <label class="custom-control-label" for="y_pval_greater">Greater than</label>
             </div>
           </div>
           <div class="col-sm-8 mt-2">
-            <input class="form-control" type="number" name="y_pval_max" min="0.0" step="0.01" value="0.15" id="y_pval_max">
+              <input class="form-control" type="number" name="y_pval" min="0.0" step="0.01" id="y_pval"
+                   value="{% if selected_filter %}{{ selected_filter.get('y_pval') }}{% else %}0.15{% endif %}">
           </div>
         </div>
       </div>
@@ -131,17 +153,38 @@
   <button class="btn btn-outline-info mt-4" type="submit" id="plot_button">Plot data</button>
 </form>
 
+
+{# error messages #}
+<div class="alert alert-danger mt-2 d-none" role="alert" id="error_div">
+  <div class="row">
+    <div class="col col-xs-10" id="error_messages"></div>
+    <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+  </div>
+</div>
+
+<div class="w-100">
+  <button type="button" class="btn btn-sm btn-outline-info d-none float-right" id="hide_counts">Hide Counts</button>
+<br></div><br> {# this br and div have to be exactly like this!! otherwise button is somewhere else #}
+
+
 {% if how_to_plot=='single_plot' %}
-  <div id="cell_line_chart" data-plot-series="{{ plot_series }}"></div>
+<div class="row">
+  <div id="cell_line_chart" class="col-sm-12" data-plot-series="{{ plot_series }}"></div>
+  <div id="boxplot_data" class="col-sm-0"></div>
+</div>
 {% elif how_to_plot=='multiple_plots' %}
-  {% for cell_line in y_axis_multiple %}
-    <div id="{{ cell_line }}_chart" data-plot-series="{{ [plot_series[cell_line]] }}"></div>
+  {% for cell_line_series in plot_series %}
+    <div class="row">
+      <div id="{{ cell_line_series['name'] }}_chart"  class="col-sm-12" data-plot-series="{{ [cell_line_series] }}"></div>
+      <div id="boxplot_data" class="col-sm-0"></div>
+    </div>
   {% endfor %}
 {% endif %}
 
 {% if data_table %}
 <div>
-  <table id="data_table" class="table table-striped table-bordered mt-4">
+  <button type="button" class="btn btn-sm btn-outline-info mb-0 float-right" id="export_button">Export Table</button>
+  <table id="data_table" class="table table-striped table-bordered mt-4" table-csv-data="{{ data_table['csv'] }}">
     <thead>
       <tr>
         {% for header in data_table['header'] %}

@@ -6,13 +6,12 @@
 </head>
 <body>
     {# custom style #}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"
+    <script src="{{ url_for('static', filename='js_libraries/jquery-3.3.1.min.js') }}"
                 crossorigin="anonymous">
         </script>
     {# requirements for bootstrap #}
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css_libraries/bootstrap.min.css') }}">
+        <script src="{{ url_for('static', filename='js_libraries/bootstrap.min.js') }}"
                 integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
                 crossorigin="anonymous">
         </script>
@@ -22,13 +21,22 @@
       <nav class="navbar navbar-light bg-light justify-content-center">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="/">Single Cell Line</a>
+            <a class="nav-link" href="/">Genes view</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/log_plots">Log Plots</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/compare">Compare Cell Lines</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/heatmap">Heat map</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/clustering">Clustering</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/data_import">Data Import</a>
           </li>
         </ul>
       </nav>
