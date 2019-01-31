@@ -178,6 +178,9 @@ $(document).ready(function() {
                 }
             },
             series: PLOT_SERIES,
+            legend: {
+                enabled: false,
+            }
         });
     }
 

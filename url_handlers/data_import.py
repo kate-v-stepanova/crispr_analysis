@@ -57,7 +57,7 @@ def import_data():
                     full_df = pd.read_csv(input_file, sep='\t')
 
                     error = ''
-                    required = ['cell_line', 'sample', 'gene_id', 'day', 'norm_counts']
+                    required = ['gene_id', 'cell_line', 'treatment', 'norm_counts']
                     if not set(required).issubset(set(full_df.columns)):
                         error = 'ERROR: incorrect header! \n'
                         error += 'Required columns: {}\n'.format(', '.join(required))
