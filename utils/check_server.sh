@@ -13,7 +13,7 @@ then
 else
 	echo $now ": Restarting"
 	source activate crispr_analysis
-	export FLASK_APP=crispr_analysis.py
+	export FLASK_APP='/home/stepanova/crispr_analysis/crispr_analysis.py'
 	export FLASK_ENV=development
 	flask run --host 0.0.0.0 &
 fi
